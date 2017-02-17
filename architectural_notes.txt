@@ -14,11 +14,11 @@ It will check that it starts with Input and finished with Softmax
 Softmax will make checks, etc, etc.
 
 Model will have api:
-- compile
+- constructor
 - fit
 - predict
 
-Model.compile:
+Model.constructor:
 
     - model checks first layer is input and last is softmax
 
@@ -67,3 +67,31 @@ Softmax - that checks for legal input shape, that computes correct output, that 
 
 Convolution2D - that creates correct kernels,
     that computes correct convolutions, that computes correct derivatives, that updates itself correctly
+
+
+Ok, so maybe I shouldn't really be doing any real work in constructors and everything should be done in compile?
+
+Well, think through carefully what could be done in constructor vs what needs to be done in compile step:
+
+Input:
+    - constructor - check input is 3D and integer, set output shape
+    - build - nothing really
+
+Flatten:
+    - constructor - nothing really
+    - build - check previous layer shape can be squeezed properly, set output shape
+
+Softmax:
+    - constructor - nothing really
+    - build - check previous layer shape is legal, set output shape
+
+Convolution2D:
+    - constructor - nothing really
+    - build - check previous layer shape and initialize kernels accordingly, set output shape
+
+Ok, what do we want to test with Model:
+- test model builds for valid input and doesn't for invalid input
+- test model outputs proper values for predict
+- test model calls proper functions for fit
+
+
