@@ -1,2 +1,2 @@
 # convolutional_network
-A simple convolutional networks library for images classification
+Nothing much in here yet, please come back later.
