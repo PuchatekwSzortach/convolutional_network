@@ -1,9 +1,12 @@
+"""
+Few MNIST networks based on Keras
+"""
+
 import os
 
 import keras.datasets.mnist
 import numpy as np
 import sklearn.preprocessing
-import cv2
 
 
 def get_single_layer_model(input_shape):
