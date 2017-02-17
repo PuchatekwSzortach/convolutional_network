@@ -3,7 +3,31 @@ Module with layers
 """
 
 
-class Input:
+class Layer:
+
+    def __init__(self):
+
+        self.output_shape = None
+        self.activation = None
+
+    def build(self):
+
+        raise NotImplementedError()
+
+    def forward(self, x):
+
+        raise NotImplementedError()
+
+    def train_forward(self):
+
+        raise NotImplementedError()
+
+    def train_backward(self):
+
+        raise NotImplementedError()
+
+
+class Input(Layer):
     """
     Input layer
     """
@@ -13,6 +37,8 @@ class Input:
         Constructor
         :param shape: 3 elements tuple (height, width, channels)
         """
+
+        super().__init__()
 
         if len(shape) != 3:
 
@@ -24,4 +50,12 @@ class Input:
 
             raise ValueError("Not all elements of shape {} are integers".format(shape))
 
-        self.shape = shape
+        self.output_shape = shape
+
+    def build(self):
+
+        pass
+
+    def forward(self, x):
+
+        return x

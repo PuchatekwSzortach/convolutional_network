@@ -95,3 +95,32 @@ Ok, what do we want to test with Model:
 - test model calls proper functions for fit
 
 
+Now think through how will the forward loop exactly look. Let's put model in charge of pushing computations between layers:
+
+So model.predict(x) will do:
+
+    for layer in self.layers:
+
+        x = layer.forward(x)
+
+    return x
+
+Ok, now how will model.fit(x) work?
+
+    Shuffle data
+
+    For batch in data:
+
+        x = batch
+
+        for layer in self.layers:
+
+            x = layer.train_forward(x)
+
+        gradients = 1
+
+        for layer in reversed(self.layers):
+
+            gradients = layer.train_backward(gradients, learning_rate)
+
+I guess :P
