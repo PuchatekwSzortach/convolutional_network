@@ -10,7 +10,7 @@ class Layer:
         self.output_shape = None
         self.activation = None
 
-    def build(self):
+    def build(self, input_shape):
 
         raise NotImplementedError()
 
@@ -50,12 +50,27 @@ class Input(Layer):
 
             raise ValueError("Not all elements of shape {} are integers".format(shape))
 
-        self.output_shape = shape
+        self.shape = shape
 
-    def build(self):
+    def build(self, input_shape):
 
-        pass
+        # Input layer's output shape is defined in its constructor
+        self.output_shape = self.shape
 
     def forward(self, x):
 
         return x
+
+
+class Flatten(Layer):
+    """
+    Layer for flattening input to 2D shape, e.g. [batch_size, labels_count]
+    """
+
+    def __init__(self):
+
+        super().__init__()
+
+    def build(self, input_shape):
+
+        pass
