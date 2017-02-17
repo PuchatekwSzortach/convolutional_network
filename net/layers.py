@@ -66,7 +66,7 @@ class Input(Layer):
 
 class Flatten(Layer):
     """
-    Layer for flattening input to 2D shape, e.g. [batch_size, labels_count]
+    Layer for flattening input. Outer dimension (batch size) is not affected
     """
 
     def __init__(self):
@@ -87,4 +87,11 @@ class Flatten(Layer):
 
     def forward(self, x):
 
-        return x
+        squeezed = np.squeeze(x)
+
+        # If batch size was one, squeeze removed it, so add it back again
+        if x.shape[0] == 1:
+
+            squeezed = np.array([squeezed])
+
+        return squeezed

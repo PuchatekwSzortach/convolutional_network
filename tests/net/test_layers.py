@@ -72,14 +72,30 @@ class TestFlattenLayer:
         flatten = net.layers.Flatten()
         x = np.arange(4).reshape((2, 2))
 
-        assert np.all(x == flatten.forward(x))
+        expected = x
+        actual = flatten.forward(x)
+
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)
 
     def test_forward_with_squeeze(self):
 
         flatten = net.layers.Flatten()
-        x = np.arange(4).reshape((1, 2, 2))
+        x = np.arange(8).reshape((2, 1, 2, 2))
 
         expected = np.squeeze(x)
         actual = flatten.forward(x)
 
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)
+
+    def test_forward_batch_size_is_one(self):
+
+        flatten = net.layers.Flatten()
+        x = np.arange(4).reshape((1, 1, 2, 2))
+
+        expected = np.arange(4).reshape((1, 2, 2))
+        actual = flatten.forward(x)
+
+        assert expected.shape == actual.shape
         assert np.all(expected == actual)
