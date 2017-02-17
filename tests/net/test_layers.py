@@ -46,4 +46,40 @@ class TestFlattenLayer:
     Tests for Flatten layer
     """
 
-    pass
+    def test_build_last_dimension_not_squeezed(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[1, 1, 4])
+
+        assert [4] == flatten.output_shape
+
+    def test_build_first_dimension_not_squeezed(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[3, 1, 1])
+
+        assert [3] == flatten.output_shape
+
+    def test_build_middle_dimension_not_squeezed(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[1, 5, 1])
+
+        assert [5] == flatten.output_shape
+
+    def test_forward_nothing_squeezed(self):
+
+        flatten = net.layers.Flatten()
+        x = np.arange(4).reshape((2, 2))
+
+        assert np.all(x == flatten.forward(x))
+
+    def test_forward_with_squeeze(self):
+
+        flatten = net.layers.Flatten()
+        x = np.arange(4).reshape((1, 2, 2))
+
+        expected = np.squeeze(x)
+        actual = flatten.forward(x)
+
+        assert np.all(expected == actual)

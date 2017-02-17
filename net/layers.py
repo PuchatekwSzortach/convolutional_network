@@ -2,6 +2,8 @@
 Module with layers
 """
 
+import numpy as np
+
 
 class Layer:
 
@@ -73,4 +75,16 @@ class Flatten(Layer):
 
     def build(self, input_shape):
 
-        pass
+        output_shape = []
+
+        for dimension in input_shape:
+
+            if dimension != 1:
+
+                output_shape.append(dimension)
+
+        self.output_shape = output_shape
+
+    def forward(self, x):
+
+        return x
