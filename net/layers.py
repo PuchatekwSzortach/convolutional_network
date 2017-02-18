@@ -59,34 +59,28 @@ class Input(Layer):
         return x
 
 
-# class Flatten(Layer):
-#     """
-#     Layer for flattening input. Outer dimension (batch size) is not affected
-#     """
-#
-#     def __init__(self):
-#
-#         super().__init__()
-#
-#     def build(self, input_shape):
-#
-#         output_shape = []
-#
-#         for dimension in input_shape:
-#
-#             if dimension != 1:
-#
-#                 output_shape.append(dimension)
-#
-#         self.output_shape = output_shape
-#
-#     def forward(self, x):
-#
-#         squeezed = np.squeeze(x)
-#
-#         # If batch size was one, squeeze removed it, so add it back again
-#         if x.shape[0] == 1:
-#
-#             squeezed = np.array([squeezed])
-#
-#         return squeezed
+class Flatten(Layer):
+    """
+    Layer for flattening input. Outer dimension (batch size) is not affected
+    """
+
+    def __init__(self):
+
+        super().__init__()
+
+    def build(self, input_shape):
+
+        squeezed_sample_shape = []
+
+        for dimension in input_shape[1:]:
+
+            if dimension != 1:
+
+                squeezed_sample_shape.append(dimension)
+
+        self.output_shape = (input_shape[0],) + tuple(squeezed_sample_shape)
+
+    def forward(self, x):
+
+        shape = (x.shape[0],) + self.output_shape[1:]
+        return x.reshape(shape)

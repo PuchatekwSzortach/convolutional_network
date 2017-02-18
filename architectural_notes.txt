@@ -145,3 +145,8 @@ So only in batch dimension
 Tuple, that's what numpy uses.
 
 4. So how do we allow lists as inputs? Just cast them to tuples if inputs are lists.
+
+
+Ok, what check should flatten layer build() make? None I think
+
+Now should Flatten.forward() perform a check? No, I think not

@@ -36,7 +36,7 @@ class TestInputLayer:
         x = np.arange(24).reshape((1, 2, 3, 4))
 
         assert np.all(x == input.forward(x))
-    
+
     def test_forward_incompatible_shape(self):
 
         input = net.layers.Input([2, 3, 4])
@@ -47,63 +47,68 @@ class TestInputLayer:
             input.forward(x)
 
 
+class TestFlattenLayer:
+    """
+    Tests for Flatten layer
+    """
 
+    def test_build_last_sample_dimension_not_squeezed(self):
 
-# class TestFlattenLayer:
-#     """
-#     Tests for Flatten layer
-#     """
-#
-#     def test_build_last_dimension_not_squeezed(self):
-#
-#         flatten = net.layers.Flatten()
-#         flatten.build(input_shape=[1, 1, 4])
-#
-#         assert [4] == flatten.output_shape
-#
-#     def test_build_first_dimension_not_squeezed(self):
-#
-#         flatten = net.layers.Flatten()
-#         flatten.build(input_shape=[3, 1, 1])
-#
-#         assert [3] == flatten.output_shape
-#
-#     def test_build_middle_dimension_not_squeezed(self):
-#
-#         flatten = net.layers.Flatten()
-#         flatten.build(input_shape=[1, 5, 1])
-#
-#         assert [5] == flatten.output_shape
-#
-#     def test_forward_nothing_squeezed(self):
-#
-#         flatten = net.layers.Flatten()
-#         x = np.arange(4).reshape((2, 2))
-#
-#         expected = x
-#         actual = flatten.forward(x)
-#
-#         assert expected.shape == actual.shape
-#         assert np.all(expected == actual)
-#
-#     def test_forward_with_squeeze(self):
-#
-#         flatten = net.layers.Flatten()
-#         x = np.arange(8).reshape((2, 1, 2, 2))
-#
-#         expected = np.squeeze(x)
-#         actual = flatten.forward(x)
-#
-#         assert expected.shape == actual.shape
-#         assert np.all(expected == actual)
-#
-#     def test_forward_batch_size_is_one(self):
-#
-#         flatten = net.layers.Flatten()
-#         x = np.arange(4).reshape((1, 1, 2, 2))
-#
-#         expected = np.arange(4).reshape((1, 2, 2))
-#         actual = flatten.forward(x)
-#
-#         assert expected.shape == actual.shape
-#         assert np.all(expected == actual)
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[4, 1, 4])
+
+        assert (4, 4) == flatten.output_shape
+
+    def test_build_first_sample_dimension_not_squeezed(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[3, 5, 1])
+
+        assert (3, 5) == flatten.output_shape
+
+    def test_forward_nothing_to_squeeze(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[None, 3, 4])
+
+        x = np.arange(24).reshape((2, 3, 4))
+
+        expected = x
+        actual = flatten.forward(x)
+
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)
+
+    def test_forward_invalid_input_shape(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[3, 4])
+        x = np.arange(4).reshape((2, 2))
+
+        with pytest.raises(ValueError):
+
+            flatten.forward(x)
+
+    def test_forward_with_squeeze(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[None, 1, 2, 2])
+        x = np.arange(8).reshape((2, 1, 2, 2))
+
+        expected = x.reshape((2, 2, 2))
+        actual = flatten.forward(x)
+
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)
+
+    def test_forward_batch_size_is_one(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[None, 1, 2, 2])
+        x = np.arange(4).reshape((1, 1, 2, 2))
+
+        expected = np.arange(4).reshape((1, 2, 2))
+        actual = flatten.forward(x)
+
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)
