@@ -55,16 +55,18 @@ class TestFlattenLayer:
     def test_build_last_sample_dimension_not_squeezed(self):
 
         flatten = net.layers.Flatten()
-        flatten.build(input_shape=[4, 1, 4])
+        flatten.build(input_shape=[None, 1, 4])
 
-        assert (4, 4) == flatten.output_shape
+        assert (None, 1, 4) == flatten.input_shape
+        assert (None, 4) == flatten.output_shape
 
     def test_build_first_sample_dimension_not_squeezed(self):
 
         flatten = net.layers.Flatten()
-        flatten.build(input_shape=[3, 5, 1])
+        flatten.build(input_shape=[None, 5, 1])
 
-        assert (3, 5) == flatten.output_shape
+        assert (None, 5, 1) == flatten.input_shape
+        assert (None, 5) == flatten.output_shape
 
     def test_forward_nothing_to_squeeze(self):
 

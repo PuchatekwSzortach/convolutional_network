@@ -70,7 +70,7 @@ class Flatten(Layer):
 
     def build(self, input_shape):
 
-        self.input_shape = input_shape
+        self.input_shape = tuple(input_shape)
 
         squeezed_sample_shape = []
 
