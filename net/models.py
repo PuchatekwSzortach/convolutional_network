@@ -2,6 +2,8 @@
 Module with models definitions
 """
 
+import numpy as np
+
 
 class Model:
     """
@@ -30,4 +32,18 @@ class Model:
             x = layer.forward(x)
 
         return x
+
+    def get_loss(self, labels, predictions):
+        """
+        Compute categorical crossentropy loss
+        :param labels: batch of labels
+        :param predictions: batch of predictions
+        :return: array of floats, one for each sample
+        """
+
+        epsilon = 1e-7
+        clipped_predictions = np.clip(predictions, epsilon, 1 - epsilon)
+
+        return -np.sum(labels * np.log(clipped_predictions), axis=1)
+
 

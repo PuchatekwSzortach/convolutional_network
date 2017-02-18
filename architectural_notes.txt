@@ -1,10 +1,5 @@
 
 
-- for Convolution2D:
-    - get depth of its predecessor
-    - initialize kernels accordingly
-    - set its own output_shape
-
 Model.fit:
 
     Shuffle data
@@ -34,17 +29,7 @@ Convolution2D - that creates correct kernels,
     that computes correct convolutions, that computes correct derivatives, that updates itself correctly
 
 
-Ok, so maybe I shouldn't really be doing any real work in constructors and everything should be done in compile?
-
-Well, think through carefully what could be done in constructor vs what needs to be done in compile step:
-
-Convolution2D:
-    - constructor - accepts arguments: nb_filter, nb_row, nb_col. For now we don't allow step size and use only valid steps.
-    - build - check previous layer shape and initialize kernels accordingly, set output shape
-
 Ok, what do we want to test with Model:
-- test model builds for valid input and doesn't for invalid input
-- test model outputs proper values for predict
 - test model calls proper functions for fit
 
 Ok, now how will model.fit(x) work?
@@ -67,11 +52,15 @@ Ok, now how will model.fit(x) work?
 
 I guess :P
 
-Ok, now when building convolutional layers:
-- I should make sure input is valid
-What constitutes a valid input?
-- 4D!
-- what else? Well, I guess that's it for now
+Ok, so what components are needed for backpropagation?
 
-Ok, test a Model.predict for Input, Convolution model
-Then for Input, Convolution, Flatten, Softmax model
+Our fit will have fit_batch().
+fit_batch() would do:
+- model would calculate loss
+- pass that loss to softmax
+- softmax would calculate gradiens to its preactivation
+- flatten would calculate its gradients
+- input would have a no op there I guess
+- convolution 2D would do its gradients
+
+start with model.get_loss()
