@@ -124,3 +124,24 @@ Ok, now how will model.fit(x) work?
             gradients = layer.train_backward(gradients, learning_rate)
 
 I guess :P
+
+
+Ok, think through the input and output shapes.
+Three issues:
+1 - should they include batch size or not
+2 - using of None - when would it be needed for different types of layers
+3 - should we use tuple or list for shapes?
+
+
+1. For input layer etc, makes no real difference. Should make no difference elsewhere. Using sample_shape we can store whole shape.
+Is there any real advantage to it? Well, same output dimensionality in error messages.
+
+2. When would we use None in input shapes?
+- batch dimension
+- convolutional layers - I guess I would use a different error message that explains problem better
+So only in batch dimension
+
+3. Should we use tuple or list for shapes?
+Tuple, that's what numpy uses.
+
+4. So how do we allow lists as inputs? Just cast them to tuples if inputs are lists.
