@@ -60,16 +60,27 @@ class TestModel:
 
         assert np.all(expected == actual)
 
-    # def test_predict_input_flatten_softmax_network(self):
-    #
-    #     input = net.layers.Input(sample_shape=(3, 1))
-    #     flatten = net.layers.Flatten()
-    #
-    #     model = net.models.Model([input, flatten])
-    #
-    #     x = np.arange(6).reshape((2, 3, 1))
-    #
-    #     expected = x.reshape(2, 3)
-    #     actual = model.predict(x)
-    #
-    #     assert np.all(expected == actual)
+    def test_predict_input_flatten_softmax_network(self):
+
+        input = net.layers.Input(sample_shape=[2])
+        flatten = net.layers.Flatten()
+        softmax = net.layers.Softmax()
+
+        model = net.models.Model([input, flatten, softmax])
+
+        x = np.array(
+            [
+                [1, 2],
+                [1, 4]
+            ])
+
+        expected = np.array(
+            [
+                [np.exp(1) / (np.exp(1) + np.exp(2)), np.exp(2) / (np.exp(1) + np.exp(2))],
+                [np.exp(1) / (np.exp(1) + np.exp(4)), np.exp(4) / (np.exp(1) + np.exp(4))]
+            ]
+        )
+
+        actual = model.predict(x)
+
+        assert np.all(expected == actual)
