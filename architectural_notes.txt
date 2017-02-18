@@ -150,3 +150,7 @@ Tuple, that's what numpy uses.
 Ok, what check should flatten layer build() make? None I think
 
 Now should Flatten.forward() perform a check? No, I think not
+
+Module constructor - what I want to check:
+1 - that first layer is an Input layer
+2 - that all layers' build method was called
