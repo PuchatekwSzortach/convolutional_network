@@ -196,11 +196,10 @@ class TestModel:
         ])
 
         epsilon = 1e-7
-        expected = np.array([epsilon, epsilon])
+        expected = np.mean([epsilon, epsilon])
 
         actual = net.models.Model([]).get_loss(labels, predictions)
 
-        assert (2,) == actual.shape
         assert np.allclose(expected, actual, atol=1e-4)
 
     def test_get_loss_perfect_mismatch(self):
@@ -218,11 +217,10 @@ class TestModel:
         ])
 
         epsilon = 1e-7
-        expected = np.array([-np.log(epsilon), -np.log(epsilon), -np.log(epsilon)])
+        expected = np.mean([-np.log(epsilon), -np.log(epsilon), -np.log(epsilon)])
 
         actual = net.models.Model([]).get_loss(labels, predictions)
 
-        assert (3,) == actual.shape
         assert np.allclose(expected, actual, atol=1e-4)
 
     def test_get_loss_simple_values(self):
@@ -239,11 +237,9 @@ class TestModel:
             [0.3, 0.7]
         ])
 
-        expected = np.array([-np.log(0.9), -np.log(0.2), -np.log(0.3)])
-
+        expected = np.mean([-np.log(0.9), -np.log(0.2), -np.log(0.3)])
         actual = net.models.Model([]).get_loss(labels, predictions)
 
-        assert (3,) == actual.shape
         assert np.allclose(expected, actual, atol=1e-4)
 
 

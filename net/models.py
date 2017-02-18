@@ -38,12 +38,10 @@ class Model:
         Compute categorical crossentropy loss
         :param labels: batch of labels
         :param predictions: batch of predictions
-        :return: array of floats, one for each sample
+        :return: mean loss of the batch predictions
         """
 
         epsilon = 1e-7
         clipped_predictions = np.clip(predictions, epsilon, 1 - epsilon)
 
-        return -np.sum(labels * np.log(clipped_predictions), axis=1)
-
-
+        return np.mean(-np.sum(labels * np.log(clipped_predictions), axis=1))
