@@ -20,7 +20,16 @@ class Model:
 
         output_shape = None
 
-        for layer in layers:
+        for layer in self.layers:
 
             layer.build(output_shape)
             output_shape = layer.output_shape
+
+    def predict(self, x):
+
+        for layer in self.layers:
+
+            x = layer.forward(x)
+
+        return x
+
