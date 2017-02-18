@@ -138,7 +138,7 @@ class Convolution2D(Layer):
 
     def __init__(self, nb_filter, nb_row, nb_col):
         """
-        Constructor
+        2D convolutional layer. Applies ReLU activation.
         :param nb_filter: number of filters
         :param nb_row: width of each filter
         :param nb_col: height of each filter
@@ -155,6 +155,10 @@ class Convolution2D(Layer):
 
     def build(self, input_shape):
 
+        if len(input_shape) != 4:
+
+            raise ValueError("Input shape {} isn't 4-dimensional".format(input_shape))
+
         self.input_shape = input_shape
         self.output_shape = (None, input_shape[1] - self.nb_row + 1, input_shape[2] - self.nb_col + 1, self.nb_filter)
 
@@ -165,4 +169,23 @@ class Convolution2D(Layer):
         self.kernels = np.random.uniform(low=-scale, high=scale, size=kernels_shape)
 
         self.biases = np.zeros((self.nb_filter,))
+
+    def forward(self, x):
+
+        output = np.zeros(shape=(x.shape[0],) + self.output_shape[1:])
+
+        for sample_index, sample in enumerate(x):
+
+            for kernel_index, (kernel, bias) in enumerate(zip(self.kernels, self.biases)):
+
+                for row_index in range(0, x.shape[1] - self.nb_row + 1):
+
+                    for col_index in range(0, x.shape[2] - self.nb_col + 1):
+
+                        input_patch = sample[row_index: row_index + self.nb_row, col_index: col_index + self.nb_col, :]
+
+                        output[sample_index, row_index, col_index, kernel_index] = np.sum(input_patch * kernel) + bias
+
+        # Apply ReLU activation
+        return output * (output > 0)
 

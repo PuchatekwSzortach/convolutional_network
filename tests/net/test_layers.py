@@ -217,7 +217,7 @@ class TestConvolution2D:
     Tests for Convolution2D layer
     """
 
-    def test_simple_build(self):
+    def test_build_simple(self):
 
         convolution = net.layers.Convolution2D(nb_filter=3, nb_row=4, nb_col=5)
         convolution.build(input_shape=(None, 10, 10, 8))
@@ -227,3 +227,96 @@ class TestConvolution2D:
 
         assert (3, 4, 5, 8) == convolution.kernels.shape
         assert (3,) == convolution.biases.shape
+
+    def test_build_input_not_4D(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=3, nb_row=4, nb_col=5)
+
+        with pytest.raises(ValueError):
+
+            convolution.build(input_shape=(None, 10, 10))
+
+    def test_forward_simple_one_input_channel_and_one_output_channel(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution.build(input_shape=(None, 4, 4, 1))
+
+        x = np.array(
+            [
+                [1, 1, 0, 0],
+                [0, 0, 1, 1],
+                [1, 0, 0, 1],
+                [0, 1, 1, 0]
+            ]
+        ).reshape((1, 4, 4, 1))
+
+        kernel = np.array([
+            [2, 3],
+            [1, 2]
+        ]).reshape(1, 2, 2, 1)
+
+        # Overwrite kernels with known values
+        convolution.kernels = kernel
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([2])
+
+        expected = np.array([
+            [7, 6, 5],
+            [3, 5, 9],
+            [6, 5, 6]
+        ]).reshape(1, 3, 3, 1)
+
+        actual = convolution.forward(x)
+
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)
+
+    def test_forward_simple_one_input_channel_and_two_output_channels(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=2, nb_row=2, nb_col=2)
+        convolution.build(input_shape=(None, 4, 4, 1))
+
+        x = np.array(
+            [
+                [1, 1, 0, 0],
+                [0, 0, 1, 1],
+                [1, 0, 0, 1],
+                [0, 1, 1, 0]
+            ]
+        ).reshape((1, 4, 4, 1))
+
+        first_kernel = np.array([
+            [2, 3],
+            [1, 2]
+        ]).reshape(2, 2, 1)
+
+        second_kernel = np.array([
+            [-1, 2],
+            [4, 0]
+        ]).reshape(2, 2, 1)
+
+        # Overwrite kernels with known values
+        convolution.kernels = np.array([first_kernel, second_kernel])
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([2, -2])
+
+        expected_first_channel = np.array([
+            [7, 6, 5],
+            [3, 5, 9],
+            [6, 5, 6]
+        ])
+
+        expected_second_channel = np.array([
+            [0, 0, 2],
+            [2, 0, 0],
+            [0, 2, 4]
+        ])
+
+        expected = np.dstack([expected_first_channel, expected_second_channel]).reshape((1, 3, 3, 2))
+
+        actual = convolution.forward(x)
+
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)

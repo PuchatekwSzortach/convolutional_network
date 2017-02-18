@@ -66,3 +66,9 @@ Ok, now how will model.fit(x) work?
             gradients = layer.train_backward(gradients, learning_rate)
 
 I guess :P
+
+Ok, now when building convolutional layers:
+- I should make sure input is valid
+What constitutes a valid input?
+- 4D!
+- what else? Well, I guess that's it for now
