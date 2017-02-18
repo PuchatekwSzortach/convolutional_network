@@ -156,5 +156,38 @@ class TestSoftmaxLayer:
         )
 
         actual = softmax.forward(x)
-        
+
         assert np.all(expected == actual)
+
+    def test_forward_check_dimensions(self):
+
+        softmax = net.layers.Softmax()
+        softmax.build(input_shape=(None, 2))
+
+        x = np.arange(16).reshape(2, 4, 2)
+
+        with pytest.raises(ValueError):
+
+            softmax.forward(x)
+
+    def test_forward_very_large_inputs(self):
+
+        softmax = net.layers.Softmax()
+        softmax.build(input_shape=(None, 2))
+
+        x = np.array(
+            [
+                [1, 2000],
+                [5000, 4]
+            ])
+
+        expected = np.array(
+            [
+                [0, 1],
+                [1, 0]
+            ]
+        )
+
+        actual = softmax.forward(x)
+
+        assert np.allclose(expected, actual)

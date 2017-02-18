@@ -101,7 +101,9 @@ class Softmax(Layer):
 
         if len(input_shape) != 2:
 
-            message = "Input shape must be 2D, but {}D input of {} was given".format(len(input_shape), input_shape)
+            message = "Input shape must be 2D, but {}D input with shape {} was given".format(
+                len(input_shape), input_shape)
+
             raise ValueError(message)
 
         self.input_shape = input_shape
@@ -109,7 +111,17 @@ class Softmax(Layer):
 
     def forward(self, x):
 
-        exponentials = np.exp(x)
+        if x.shape[:1] != self.input_shape[1:]:
+
+            message = "Input shape must be 2D, but {}D input with shape {} was given".format(
+                len(x.shape), x.shape)
+
+            raise ValueError(message)
+
+        # Clip values to sensible range for numerical stability
+        clipped = np.clip(x, -50, 50)
+
+        exponentials = np.exp(clipped)
         exponential_sums = np.sum(exponentials, axis=1).reshape((x.shape[0], 1))
 
         return exponentials / exponential_sums
