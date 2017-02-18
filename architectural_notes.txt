@@ -64,3 +64,11 @@ fit_batch() would do:
 - convolution 2D would do its gradients
 
 start with model.get_loss()
+
+
+Hmm, so I know how to compute error gradients across Softmax layer.
+But - to do that it needs:
+- predictions
+- correct labels
+Predictions it can cache in train_forward(), but what about correct labels? How do they get in there?
+I need train_backward(correct_labels)

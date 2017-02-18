@@ -20,11 +20,11 @@ class Layer:
 
         raise NotImplementedError()
 
-    def train_forward(self):
+    def train_forward(self, x):
 
         raise NotImplementedError()
 
-    def train_backward(self):
+    def train_backward(self, gradients):
 
         raise NotImplementedError()
 
@@ -88,14 +88,17 @@ class Flatten(Layer):
         return x.reshape(shape)
 
 
-class Softmax(Layer):
+class Softmax:
     """
     Softmax layer
     """
 
     def __init__(self):
 
-        super().__init__()
+        self.input_shape = None
+        self.output_shape = None
+
+        self.last_output = None
 
     def build(self, input_shape):
 
@@ -132,6 +135,20 @@ class Softmax(Layer):
         exponential_sums = np.sum(exponentials, axis=1).reshape((x.shape[0], 1))
 
         return exponentials / exponential_sums
+
+    def train_forward(self, x):
+
+        self.last_output = self.forward(x)
+        return self.last_output
+
+    def train_backward(self, labels):
+        """
+        Given correct labels for last predictions, compute error gradients
+        :param labels: batch of correct labels
+        :return: batch of error gradients
+        """
+
+        return self.last_output - labels
 
 
 class Convolution2D(Layer):
@@ -188,4 +205,3 @@ class Convolution2D(Layer):
 
         # Apply ReLU activation
         return output * (output > 0)
-

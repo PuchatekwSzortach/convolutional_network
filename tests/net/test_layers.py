@@ -211,6 +211,35 @@ class TestSoftmax:
 
         assert np.allclose(expected, actual)
 
+    def test_train_backward_simple(self):
+
+        softmax = net.layers.Softmax()
+        softmax.build(input_shape=(None, 2))
+
+        x = np.array([
+            [1, 2],
+            [1, 4],
+            [2, 3],
+        ])
+
+        y = np.array([
+            [1, 0],
+            [1, 0],
+            [0, 1]
+        ])
+
+        expected = np.array([
+            [0.269 - 1, 0.731],
+            [0.047 - 1, 0.9523],
+            [0.268, 0.731 - 1]
+        ])
+
+        softmax.train_forward(x)
+        actual = softmax.train_backward(y)
+
+        assert expected.shape == actual.shape
+        assert np.allclose(expected, actual, atol=0.01)
+
 
 class TestConvolution2D:
     """
@@ -276,7 +305,6 @@ class TestConvolution2D:
 
         convolution = net.layers.Convolution2D(nb_filter=2, nb_row=2, nb_col=2)
         convolution.build(input_shape=(None, 4, 4, 1))
-
 
         x = np.array(
             [
