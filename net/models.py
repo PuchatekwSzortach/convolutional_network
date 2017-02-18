@@ -2,8 +2,6 @@
 Module with models definitions
 """
 
-import net.layers
-
 
 class Model:
     """

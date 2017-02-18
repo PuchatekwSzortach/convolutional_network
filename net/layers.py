@@ -86,3 +86,23 @@ class Flatten(Layer):
 
         shape = (x.shape[0],) + self.output_shape[1:]
         return x.reshape(shape)
+
+
+class Softmax(Layer):
+    """
+    Softmax layer
+    """
+
+    def __init__(self):
+
+        super().__init__()
+
+    def build(self, input_shape):
+
+        if len(input_shape) != 2:
+
+            message = "Input shape must be 2D, but {}D input of {} was given".format(len(input_shape), input_shape)
+            raise ValueError(message)
+
+        self.input_shape = input_shape
+        self.output_shape = input_shape

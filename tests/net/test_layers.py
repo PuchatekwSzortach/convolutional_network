@@ -114,3 +114,26 @@ class TestFlattenLayer:
 
         assert expected.shape == actual.shape
         assert np.all(expected == actual)
+
+
+class TestSoftmaxLayer:
+    """
+    Tests for Softmax layer
+    """
+
+    def test_build_simple(self):
+
+        softmax = net.layers.Softmax()
+        softmax.build(input_shape=(None, 10))
+
+        assert (None, 10) == softmax.input_shape
+        assert (None, 10) == softmax.output_shape
+
+    def test_build_invalid_shape(self):
+
+        softmax = net.layers.Softmax()
+
+        with pytest.raises(ValueError):
+
+            softmax.build(input_shape=(None, 20, 5))
+
