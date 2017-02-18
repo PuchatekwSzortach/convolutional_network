@@ -9,7 +9,7 @@ import numpy as np
 import net.layers
 
 
-class TestInputLayer:
+class TestInput:
     """
     Tests for Input layer class
     """
@@ -47,7 +47,7 @@ class TestInputLayer:
             input.forward(x)
 
 
-class TestFlattenLayer:
+class TestFlatten:
     """
     Tests for Flatten layer
     """
@@ -116,7 +116,7 @@ class TestFlattenLayer:
         assert np.all(expected == actual)
 
 
-class TestSoftmaxLayer:
+class TestSoftmax:
     """
     Tests for Softmax layer
     """
@@ -210,3 +210,20 @@ class TestSoftmaxLayer:
         actual = softmax.forward(x)
 
         assert np.allclose(expected, actual)
+
+
+class TestConvolution2D:
+    """
+    Tests for Convolution2D layer
+    """
+
+    def test_simple_build(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=3, nb_row=4, nb_col=5)
+        convolution.build(input_shape=(None, 10, 10, 8))
+
+        assert (None, 10, 10, 8) == convolution.input_shape
+        assert (None, 7, 6, 3) == convolution.output_shape
+
+        assert (3, 4, 5, 8) == convolution.kernels.shape
+        assert (3,) == convolution.biases.shape

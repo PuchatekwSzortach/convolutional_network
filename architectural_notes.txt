@@ -38,37 +38,14 @@ Ok, so maybe I shouldn't really be doing any real work in constructors and every
 
 Well, think through carefully what could be done in constructor vs what needs to be done in compile step:
 
-Input:
-    - constructor - check input is 3D and integer, set output shape
-    - build - nothing really
-
-Flatten:
-    - constructor - nothing really
-    - build - check previous layer shape can be squeezed properly, set output shape
-
-Softmax:
-    - constructor - nothing really
-    - build - check previous layer shape is legal, set output shape
-
 Convolution2D:
-    - constructor - nothing really
+    - constructor - accepts arguments: nb_filter, nb_row, nb_col. For now we don't allow step size and use only valid steps.
     - build - check previous layer shape and initialize kernels accordingly, set output shape
 
 Ok, what do we want to test with Model:
 - test model builds for valid input and doesn't for invalid input
 - test model outputs proper values for predict
 - test model calls proper functions for fit
-
-
-Now think through how will the forward loop exactly look. Let's put model in charge of pushing computations between layers:
-
-So model.predict(x) will do:
-
-    for layer in self.layers:
-
-        x = layer.forward(x)
-
-    return x
 
 Ok, now how will model.fit(x) work?
 
@@ -89,33 +66,3 @@ Ok, now how will model.fit(x) work?
             gradients = layer.train_backward(gradients, learning_rate)
 
 I guess :P
-
-
-Ok, think through the input and output shapes.
-Three issues:
-1 - should they include batch size or not
-2 - using of None - when would it be needed for different types of layers
-3 - should we use tuple or list for shapes?
-
-
-1. For input layer etc, makes no real difference. Should make no difference elsewhere. Using sample_shape we can store whole shape.
-Is there any real advantage to it? Well, same output dimensionality in error messages.
-
-2. When would we use None in input shapes?
-- batch dimension
-- convolutional layers - I guess I would use a different error message that explains problem better
-So only in batch dimension
-
-3. Should we use tuple or list for shapes?
-Tuple, that's what numpy uses.
-
-4. So how do we allow lists as inputs? Just cast them to tuples if inputs are lists.
-
-
-Ok, what check should flatten layer build() make? None I think
-
-Now should Flatten.forward() perform a check? No, I think not
-
-Module constructor - what I want to check:
-1 - that first layer is an Input layer
-2 - that all layers' build method was called

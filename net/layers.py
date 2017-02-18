@@ -132,3 +132,37 @@ class Softmax(Layer):
         exponential_sums = np.sum(exponentials, axis=1).reshape((x.shape[0], 1))
 
         return exponentials / exponential_sums
+
+
+class Convolution2D(Layer):
+
+    def __init__(self, nb_filter, nb_row, nb_col):
+        """
+        Constructor
+        :param nb_filter: number of filters
+        :param nb_row: width of each filter
+        :param nb_col: height of each filter
+        """
+
+        super().__init__()
+
+        self.nb_filter = nb_filter
+        self.nb_row = nb_row
+        self.nb_col = nb_col
+
+        self.kernels = None
+        self.biases = None
+
+    def build(self, input_shape):
+
+        self.input_shape = input_shape
+        self.output_shape = (None, input_shape[1] - self.nb_row + 1, input_shape[2] - self.nb_col + 1, self.nb_filter)
+
+        input_channels = input_shape[-1]
+        kernels_shape = (self.nb_filter, self.nb_row, self.nb_col, input_channels)
+
+        scale = np.sqrt(2 / (self.nb_row * self.nb_col * input_channels))
+        self.kernels = np.random.uniform(low=-scale, high=scale, size=kernels_shape)
+
+        self.biases = np.zeros((self.nb_filter,))
+
