@@ -84,3 +84,101 @@ class TestModel:
         actual = model.predict(x)
 
         assert np.all(expected == actual)
+
+    def test_predict_input_convolution_network(self):
+
+        input = net.layers.Input(sample_shape=[3, 3, 1])
+        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+
+        model = net.models.Model([input, convolution])
+
+        x = np.array([
+            [1, 0, 2],
+            [2, 0, 1],
+            [-1, 0, -1]
+        ]).reshape((1, 3, 3, 1))
+
+        kernel = np.array([
+            [2, 3],
+            [1, 2]
+        ]).reshape(1, 2, 2, 1)
+
+        # Overwrite kernels with known values
+        convolution.kernels = kernel
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([2])
+
+        expected = np.array([
+            [6, 10],
+            [5, 3]
+        ]).reshape((1, 2, 2, 1))
+
+        actual = model.predict(x)
+
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)
+
+    def test_predict_input_convolution_flatten_softmax_network(self):
+
+        input = net.layers.Input(sample_shape=[3, 3, 2])
+        convolution = net.layers.Convolution2D(nb_filter=2, nb_row=3, nb_col=3)
+        flatten = net.layers.Flatten()
+        softmax = net.layers.Softmax()
+
+        model = net.models.Model([input, convolution, flatten, softmax])
+
+        first_channel = np.array([
+            [1, 0, 2],
+            [2, 0, 1],
+            [-1, 0, -1]
+        ])
+
+        second_channel = np.array([
+            [2, 1, 0],
+            [1, 0, 2],
+            [-4, 0, 1]
+        ])
+
+        x = np.dstack([first_channel, second_channel]).reshape((1, 3, 3, 2))
+
+        first_kernel_first_channel = np.array([
+            [2, 3, 0],
+            [1, 2, 1],
+            [0, -1, -1]
+        ])
+
+        first_kernel_second_channel = np.array([
+            [1, 0, 2],
+            [-1, 2, 0],
+            [0, 1, 2]
+        ])
+
+        first_kernel = np.dstack([first_kernel_first_channel, first_kernel_second_channel])
+
+        second_kernel_first_channel = np.array([
+            [-1, -1, 0],
+            [2, 0, 0],
+            [1, 0, 4]
+        ])
+
+        second_kernel_second_channel = np.array([
+            [2, 0, 0],
+            [-1, -2, 0],
+            [2, 3, 0]
+        ])
+
+        second_kernel = np.dstack([second_kernel_first_channel, second_kernel_second_channel])
+
+        # Overwrite kernels with known values
+        convolution.kernels = np.array([first_kernel, second_kernel])
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([-2, 10])
+
+        expected = np.array([0.982, 0.018]).reshape((1, 2))
+
+        actual = model.predict(x)
+
+        assert expected.shape == actual.shape
+        assert np.allclose(expected, actual, atol=0.01)

@@ -277,6 +277,7 @@ class TestConvolution2D:
         convolution = net.layers.Convolution2D(nb_filter=2, nb_row=2, nb_col=2)
         convolution.build(input_shape=(None, 4, 4, 1))
 
+
         x = np.array(
             [
                 [1, 1, 0, 0],

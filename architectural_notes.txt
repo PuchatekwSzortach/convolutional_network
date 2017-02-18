@@ -72,3 +72,6 @@ Ok, now when building convolutional layers:
 What constitutes a valid input?
 - 4D!
 - what else? Well, I guess that's it for now
+
+Ok, test a Model.predict for Input, Convolution model
+Then for Input, Convolution, Flatten, Softmax model

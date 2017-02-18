@@ -118,7 +118,7 @@ class Softmax(Layer):
 
     def forward(self, x):
 
-        if x.shape[:1] != self.input_shape[1:]:
+        if x.shape[1:] != self.input_shape[1:]:
 
             message = "Input shape incorrect, expected {} but {} was given".format(
                 self.input_shape, x.shape)
