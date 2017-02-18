@@ -106,6 +106,13 @@ class Softmax(Layer):
 
             raise ValueError(message)
 
+        if input_shape[1] == 1:
+
+            message = "Last input shape dimension must be larger than 1, but provided input shape is: {}"\
+                .format(input_shape)
+
+            raise ValueError(message)
+
         self.input_shape = input_shape
         self.output_shape = input_shape
 
@@ -113,8 +120,8 @@ class Softmax(Layer):
 
         if x.shape[:1] != self.input_shape[1:]:
 
-            message = "Input shape must be 2D, but {}D input with shape {} was given".format(
-                len(x.shape), x.shape)
+            message = "Input shape incorrect, expected {} but {} was given".format(
+                self.input_shape, x.shape)
 
             raise ValueError(message)
 

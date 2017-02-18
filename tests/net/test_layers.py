@@ -129,13 +129,21 @@ class TestSoftmaxLayer:
         assert (None, 10) == softmax.input_shape
         assert (None, 10) == softmax.output_shape
 
-    def test_build_invalid_shape(self):
+    def test_build_shape_more_than_2D(self):
 
         softmax = net.layers.Softmax()
 
         with pytest.raises(ValueError):
 
             softmax.build(input_shape=(None, 20, 5))
+
+    def test_build_label_shape_less_than_two(self):
+
+        softmax = net.layers.Softmax()
+
+        with pytest.raises(ValueError):
+
+            softmax.build(input_shape=(None, 1))
 
     def test_forward_simple(self):
 
@@ -159,12 +167,23 @@ class TestSoftmaxLayer:
 
         assert np.all(expected == actual)
 
-    def test_forward_check_dimensions(self):
+    def test_forward_input_dimension_larger_than_2(self):
 
         softmax = net.layers.Softmax()
         softmax.build(input_shape=(None, 2))
 
         x = np.arange(16).reshape(2, 4, 2)
+
+        with pytest.raises(ValueError):
+
+            softmax.forward(x)
+
+    def test_forward_label_dimension_is_1(self):
+
+        softmax = net.layers.Softmax()
+        softmax.build(input_shape=(None, 2))
+
+        x = np.arange(10).reshape(10, 1)
 
         with pytest.raises(ValueError):
 

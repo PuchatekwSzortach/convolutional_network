@@ -59,3 +59,17 @@ class TestModel:
         actual = model.predict(x)
 
         assert np.all(expected == actual)
+
+    # def test_predict_input_flatten_softmax_network(self):
+    #
+    #     input = net.layers.Input(sample_shape=(3, 1))
+    #     flatten = net.layers.Flatten()
+    #
+    #     model = net.models.Model([input, flatten])
+    #
+    #     x = np.arange(6).reshape((2, 3, 1))
+    #
+    #     expected = x.reshape(2, 3)
+    #     actual = model.predict(x)
+    #
+    #     assert np.all(expected == actual)
