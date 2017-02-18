@@ -106,3 +106,10 @@ class Softmax(Layer):
 
         self.input_shape = input_shape
         self.output_shape = input_shape
+
+    def forward(self, x):
+
+        exponentials = np.exp(x)
+        exponential_sums = np.sum(exponentials, axis=1).reshape((x.shape[0], 1))
+
+        return exponentials / exponential_sums

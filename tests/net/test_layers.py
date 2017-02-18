@@ -137,3 +137,24 @@ class TestSoftmaxLayer:
 
             softmax.build(input_shape=(None, 20, 5))
 
+    def test_forward_simple(self):
+
+        softmax = net.layers.Softmax()
+        softmax.build(input_shape=(None, 2))
+
+        x = np.array(
+            [
+                [1, 2],
+                [1, 4]
+            ])
+
+        expected = np.array(
+            [
+                [np.exp(1) / (np.exp(1) + np.exp(2)), np.exp(2) / (np.exp(1) + np.exp(2))],
+                [np.exp(1) / (np.exp(1) + np.exp(4)), np.exp(4) / (np.exp(1) + np.exp(4))]
+            ]
+        )
+
+        actual = softmax.forward(x)
+        
+        assert np.all(expected == actual)
