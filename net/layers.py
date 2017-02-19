@@ -196,6 +196,8 @@ class Convolution2D(Layer):
         self.kernels = None
         self.biases = None
 
+        self.last_preactivation = None
+
     def build(self, input_shape):
 
         if len(input_shape) != 4:
@@ -215,7 +217,14 @@ class Convolution2D(Layer):
 
     def forward(self, x):
 
-        output = np.zeros(shape=(x.shape[0],) + self.output_shape[1:])
+        preactivation = self.get_preactivation(x)
+
+        # Apply ReLU activation
+        return self.relu(preactivation)
+
+    def get_preactivation(self, x):
+
+        preactivation = np.zeros(shape=(x.shape[0],) + self.output_shape[1:])
 
         for sample_index, sample in enumerate(x):
 
@@ -224,10 +233,20 @@ class Convolution2D(Layer):
                 for row_index in range(0, x.shape[1] - self.nb_row + 1):
 
                     for col_index in range(0, x.shape[2] - self.nb_col + 1):
-
                         input_patch = sample[row_index: row_index + self.nb_row, col_index: col_index + self.nb_col, :]
 
-                        output[sample_index, row_index, col_index, kernel_index] = np.sum(input_patch * kernel) + bias
+                        preactivation[sample_index, row_index, col_index, kernel_index] = np.sum(input_patch * kernel) + bias
 
-        # Apply ReLU activation
-        return output * (output > 0)
+        return preactivation
+
+    def relu(self, x):
+
+        return x * (x > 0)
+
+    def train_forward(self, x):
+
+        raise NotImplementedError()
+
+    def train_backward(self, gradients):
+
+        raise NotImplementedError()
