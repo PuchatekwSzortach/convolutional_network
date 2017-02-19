@@ -197,21 +197,22 @@ class Convolution2D(Layer):
 
         for kernel_index in range(len(self.kernels)):
 
-            self.update_bias(preactivation_error_gradients, kernel_index, learning_rate)
-            self.update_kernel_weights(preactivation_error_gradients, kernel_index, learning_rate)
+            # Select gradients that were affected by current kernel
+            # Result is a 3D tensor with dimensions (y, x, z)
+            kernel_preactivation_error_gradients = preactivation_error_gradients[:, :, :, kernel_index]
 
-    def update_bias(self, preactivation_error_gradients, kernel_index, learning_rate):
+            self.update_bias(kernel_preactivation_error_gradients, kernel_index, learning_rate)
+            self.update_kernel_weights(kernel_preactivation_error_gradients, kernel_index, learning_rate)
 
-        bias_error_gradients = preactivation_error_gradients[:, kernel_index, :, :]
+    def update_bias(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
 
-        bias_error_gradients_sums = np.sum(bias_error_gradients, axis=(1, 2))
+        bias_error_gradients_sums = np.sum(kernel_preactivation_error_gradients, axis=(1, 2))
         mean_bias_error_gradient = np.mean(bias_error_gradients_sums)
 
         self.biases[kernel_index] -= learning_rate * mean_bias_error_gradient
 
-    def update_kernel_weights(self, preactivation_error_gradients, kernel_index, learning_rate):
+    def update_kernel_weights(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
 
-        # Iterating over all weights of the kernel
         for y in range(self.nb_row):
 
             input_row_start = y
@@ -224,19 +225,19 @@ class Convolution2D(Layer):
 
                 for z in range(self.input_shape[-1]):
 
-                    # Get part of preactivation_error_gradients that were affected by that weight
+                    # Select image patch that was convolved with weights at kernels[kernel_index, y, x, :]
                     input_patch = self.last_input[
                                   :,
                                   input_row_start: input_row_end,
                                   input_column_start: input_column_end,
-                                  :]
+                                  z]
 
-                    weight_errors_gradients = preactivation_error_gradients * input_patch
+                    weight_errors_gradients = kernel_preactivation_error_gradients * input_patch
 
-                    weight_errors_gradients_sum = np.sum(weight_errors_gradients, axis=(1, 2))
-                    mean_weight_errors_gradient = np.mean(weight_errors_gradients_sum)
+                    mean_weight_errors_gradient = np.mean(weight_errors_gradients)
 
-                    self.kernels[kernel_index, y, x, z] -= learning_rate * mean_weight_errors_gradient
+                    weight_indices = (kernel_index, y, x, z)
+                    self.kernels[weight_indices] -= learning_rate * mean_weight_errors_gradient
 
 
 class Softmax:
