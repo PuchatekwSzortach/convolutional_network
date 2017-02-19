@@ -420,3 +420,45 @@ class TestConvolution2D:
         assert np.all(x == convolution.last_input)
         assert np.all(expected == actual)
         assert np.all(expected == convolution.last_output)
+
+    def test_train_backward_simple_one_input_channel_and_one_output_channel_single_sample_2x2_image(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution.build(input_shape=(None, 2, 2, 1))
+
+        x = np.array([
+            [2, 3],
+            [5, 1]
+        ]).reshape((1, 2, 2, 1))
+
+        kernel = np.array([
+            [2, -2],
+            [0, 1]
+        ], dtype=np.float32).reshape(1, 2, 2, 1)
+
+        # Overwrite kernels with known values
+        convolution.kernels = kernel
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([2], dtype=np.float32)
+
+        expected_activation = np.array([1]).reshape(1, 1, 1, 1)
+
+        actual_activation = convolution.train_forward(x)
+
+        assert np.all(expected_activation == actual_activation)
+
+        gradients = np.array([0.5]).reshape(1, 1, 1, 1)
+        learning_rate = 1
+
+        convolution.train_backward(gradients, learning_rate)
+
+        expected_biases = np.array([1.5])
+
+        expected_kernels = np.array([
+            [1, -3.5],
+            [-2.5, 0.5]
+        ]).reshape(1, 2, 2, 1)
+
+        assert np.all(expected_biases == convolution.biases)
+        assert np.all(expected_kernels == convolution.kernels)
