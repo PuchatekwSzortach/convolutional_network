@@ -115,6 +115,22 @@ class TestFlatten:
         assert expected.shape == actual.shape
         assert np.all(expected == actual)
 
+    def test_train_backward_simple(self):
+
+        flatten = net.layers.Flatten()
+        flatten.build(input_shape=[None, 1, 1, 3])
+
+        x = np.arange(6).reshape((2, 1, 1, 3))
+        gradients = np.squeeze(2 * x)
+
+        expected = 2 * x
+
+        flatten.train_forward(x)
+        actual = flatten.train_backward(gradients)
+
+        assert expected.shape == actual.shape
+        assert np.all(expected == actual)
+
 
 class TestSoftmax:
     """
@@ -211,7 +227,7 @@ class TestSoftmax:
 
         assert np.allclose(expected, actual)
 
-    def test_train_backward_simple(self):
+    def test_get_output_layer_error_gradients_simple(self):
 
         softmax = net.layers.Softmax()
         softmax.build(input_shape=(None, 2))
@@ -235,7 +251,7 @@ class TestSoftmax:
         ])
 
         softmax.train_forward(x)
-        actual = softmax.train_backward(y)
+        actual = softmax.get_output_layer_error_gradients(y)
 
         assert expected.shape == actual.shape
         assert np.allclose(expected, actual, atol=0.01)

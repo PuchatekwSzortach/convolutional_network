@@ -6,7 +6,7 @@ import time
 import os
 import numpy as np
 import keras.datasets.mnist
-import sklearn.preprocessing
+import keras.utils.np_utils
 
 import net.layers
 import net.models
@@ -21,9 +21,8 @@ def main():
     X_train = np.stack([X_train], axis=-1) / 255
     X_test = np.stack([X_test], axis=-1) / 255
 
-    labels_binarizer = sklearn.preprocessing.LabelBinarizer().fit(y_test)
-    y_train = labels_binarizer.transform(y_train)
-    y_test = labels_binarizer.transform(y_test)
+    y_train = keras.utils.np_utils.to_categorical(y_train)
+    y_test = keras.utils.np_utils.to_categorical(y_test)
 
     batch = X_train
 

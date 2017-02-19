@@ -4,9 +4,10 @@ Few MNIST networks based on Keras
 
 import os
 
+import keras
 import keras.datasets.mnist
+import keras.utils.np_utils
 import numpy as np
-import sklearn.preprocessing
 
 
 def get_single_layer_model(input_shape):
@@ -69,15 +70,14 @@ def main():
     X_train = np.stack([X_train], axis=-1) / 255
     X_test = np.stack([X_test], axis=-1) / 255
 
-    labels_binarizer = sklearn.preprocessing.LabelBinarizer().fit(y_test)
-    y_train = labels_binarizer.transform(y_train)
-    y_test = labels_binarizer.transform(y_test)
+    y_train = keras.utils.np_utils.to_categorical(y_train)
+    y_test = keras.utils.np_utils.to_categorical(y_test)
 
     input_shape = [28, 28, 1]
 
-    # model = get_single_layer_model(input_shape)
+    model = get_single_layer_model(input_shape)
     # model = get_two_layers_model(input_shape)
-    model = get_three_layers_model(input_shape)
+    # model = get_three_layers_model(input_shape)
 
     # print(model.predict(X_test[:20]).shape)
 

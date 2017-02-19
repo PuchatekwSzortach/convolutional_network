@@ -12,6 +12,9 @@ class Layer:
         self.input_shape = None
         self.output_shape = None
 
+        self.last_input = None
+        self.last_output = None
+
     def build(self, input_shape):
 
         raise NotImplementedError()
@@ -87,6 +90,17 @@ class Flatten(Layer):
         shape = (x.shape[0],) + self.output_shape[1:]
         return x.reshape(shape)
 
+    def train_forward(self, x):
+
+        self.last_input = x
+        self.last_output = self.forward(x)
+
+        return self.last_output
+
+    def train_backward(self, gradients):
+
+        return gradients.reshape(self.last_input.shape)
+
 
 class Softmax:
     """
@@ -141,7 +155,7 @@ class Softmax:
         self.last_output = self.forward(x)
         return self.last_output
 
-    def train_backward(self, labels):
+    def get_output_layer_error_gradients(self, labels):
         """
         Given correct labels for last predictions, compute error gradients
         :param labels: batch of correct labels
