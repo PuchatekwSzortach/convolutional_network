@@ -196,8 +196,6 @@ class Convolution2D(Layer):
         self.kernels = None
         self.biases = None
 
-        self.last_preactivation = None
-
     def build(self, input_shape):
 
         if len(input_shape) != 4:
@@ -245,7 +243,12 @@ class Convolution2D(Layer):
 
     def train_forward(self, x):
 
-        raise NotImplementedError()
+        self.last_input = x
+
+        preactivation = self.get_preactivation(x)
+        self.last_output = self.relu(preactivation)
+
+        return self.last_output
 
     def train_backward(self, gradients):
 

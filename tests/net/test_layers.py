@@ -383,3 +383,40 @@ class TestConvolution2D:
 
         assert expected.shape == actual.shape
         assert np.all(expected == actual)
+
+    def test_train_forward_simple_one_input_channel_and_one_output_channel(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution.build(input_shape=(None, 4, 4, 1))
+
+        x = np.array(
+            [
+                [1, 1, 0, 0],
+                [0, 0, 1, 1],
+                [1, 0, 0, 1],
+                [0, 1, 1, 0]
+            ]
+        ).reshape((1, 4, 4, 1))
+
+        kernel = np.array([
+            [2, 3],
+            [1, 2]
+        ]).reshape(1, 2, 2, 1)
+
+        # Overwrite kernels with known values
+        convolution.kernels = kernel
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([2])
+
+        expected = np.array([
+            [7, 6, 5],
+            [3, 5, 9],
+            [6, 5, 6]
+        ]).reshape(1, 3, 3, 1)
+
+        actual = convolution.train_forward(x)
+
+        assert np.all(x == convolution.last_input)
+        assert np.all(expected == actual)
+        assert np.all(expected == convolution.last_output)
