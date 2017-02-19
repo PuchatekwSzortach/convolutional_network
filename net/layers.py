@@ -61,6 +61,18 @@ class Input(Layer):
 
         return x
 
+    def train_forward(self, x):
+
+        return self.forward(x)
+
+    def train_backward(self, gradients):
+        """
+        For Input layer train backward is a no-op
+        :return: None
+        """
+
+        return None
+
 
 class Flatten(Layer):
     """

@@ -46,6 +46,24 @@ class TestInput:
 
             input.forward(x)
 
+    def test_train_forward_simple(self):
+
+        input = net.layers.Input([4])
+        x = np.array([1, 2, 3, 4]).reshape(1, 4)
+
+        expected = x
+        actual = input.train_forward(x)
+
+        assert np.all(expected == actual)
+
+    def test_train_backward_simple(self):
+
+        input = net.layers.Input([4])
+
+        gradients = np.array([1])
+
+        assert input.train_backward(gradients) is None
+
 
 class TestFlatten:
     """
