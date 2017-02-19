@@ -229,7 +229,7 @@ class Convolution2D(Layer):
                                   :,
                                   input_row_start: input_row_end,
                                   input_column_start: input_column_end,
-                                  kernel_index]
+                                  :]
 
                     weight_errors_gradients = preactivation_error_gradients * input_patch
 
