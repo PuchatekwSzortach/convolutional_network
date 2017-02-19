@@ -234,7 +234,7 @@ class Convolution2D(Layer):
 
                     weight_errors_gradients = kernel_preactivation_error_gradients * input_patch
 
-                    mean_weight_errors_gradient = np.mean(weight_errors_gradients)
+                    mean_weight_errors_gradient = np.sum(weight_errors_gradients)
 
                     weight_indices = (kernel_index, y, x, z)
                     self.kernels[weight_indices] -= learning_rate * mean_weight_errors_gradient
