@@ -72,3 +72,20 @@ But - to do that it needs:
 - correct labels
 Predictions it can cache in train_forward(), but what about correct labels? How do they get in there?
 I need train_backward(correct_labels)
+
+Convolution backpropagation:
+
+Checked cases:
+- one image 2x2x1, 1 kernel 2x2
+- one image 3x3x1, 1 kernel 2x2
+- one image 2x2x2, 3 kernels 2x2
+- one image 3x3x2, 2 kernels 2x2
+
+Not yet checked cases:
+- forward convolution - 2 images 2x2, 1 kernel 2x2
+- forward convolution - 2 images 2x2, 3 kernels 2x2
+- forward convolution - 2 images 3x3, 1 kernel 2x2
+- forward convolution - 2 images 3x3, 2 kernels 2x2
+- two images 2x2x1, 1 kernel 2x2
+- two images 3x3x1, 1 kernel 2x2
+- two images 3x3x2, 2 kernels 2x2
