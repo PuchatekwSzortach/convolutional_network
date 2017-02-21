@@ -225,19 +225,23 @@ class Convolution2D(Layer):
 
                 for z in range(self.input_shape[-1]):
 
-                    # Select image patch that was convolved with weights at kernels[kernel_index, y, x, :]
-                    input_patch = self.last_input[
+                    inputs_patches = self.last_input[
                                   :,
                                   input_row_start: input_row_end,
                                   input_column_start: input_column_end,
                                   z]
 
-                    weight_errors_gradients = kernel_preactivation_error_gradients * input_patch
+                    total_gradient_change = 0
 
-                    mean_weight_errors_gradient = np.sum(weight_errors_gradients)
+                    # Compute gradients for each image
+                    for image_index in range(len(inputs_patches)):
+
+                        weight_errors_gradients = kernel_preactivation_error_gradients[image_index] * inputs_patches[image_index]
+
+                        total_gradient_change += np.sum(weight_errors_gradients)
 
                     weight_indices = (kernel_index, y, x, z)
-                    self.kernels[weight_indices] -= learning_rate * mean_weight_errors_gradient
+                    self.kernels[weight_indices] -= learning_rate * total_gradient_change / len(inputs_patches)
 
 
 class Softmax:

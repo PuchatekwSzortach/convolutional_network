@@ -869,3 +869,52 @@ class TestConvolution2D:
 
         assert np.all(expected_kernels == convolution.kernels)
 
+    def test_train_backward_two_2x2x1_images_one_2x2x1_kernel(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution.build(input_shape=(None, 2, 2, 1))
+
+        first_image = np.array([
+            [1, -2],
+            [4, 3]
+        ]).reshape(2, 2, 1)
+
+        second_image = np.array([
+            [2, 1],
+            [3, 2]
+        ]).reshape(2, 2, 1)
+
+        images = np.array([first_image, second_image]).astype(np.float32)
+
+        kernel = np.array([
+            [1, 2],
+            [4, -1]
+        ]).reshape(1, 2, 2, 1).astype(np.float32)
+
+        # Overwrite kernels with known values
+        convolution.kernels = kernel
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([2], dtype=np.float32)
+
+        expected_activation = np.array([12, 16]).reshape(2, 1, 1, 1)
+
+        actual_activation = convolution.train_forward(images)
+
+        assert np.all(expected_activation == actual_activation)
+
+        gradients = np.array([1, 2]).reshape(2, 1, 1, 1).astype(np.float32)
+        learning_rate = 1
+
+        convolution.train_backward(gradients, learning_rate)
+
+        expected_biases = np.array([0.5])
+
+        assert np.all(expected_biases == convolution.biases)
+
+        expected_kernels = np.array([
+            [-1.5, 2],
+            [-1, -4.5]
+        ]).reshape(1, 2, 2, 1)
+
+        assert np.all(expected_kernels == convolution.kernels)
