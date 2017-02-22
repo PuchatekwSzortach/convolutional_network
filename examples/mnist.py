@@ -4,9 +4,12 @@ A few MNIST networks
 import time
 
 import os
+
+import tqdm
 import numpy as np
 import keras.datasets.mnist
 import keras.utils.np_utils
+import sklearn.utils
 
 import net.layers
 import net.models
@@ -24,8 +27,6 @@ def main():
     y_train = keras.utils.np_utils.to_categorical(y_train)
     y_test = keras.utils.np_utils.to_categorical(y_test)
 
-    batch = X_train
-
     layers = [
         net.layers.Input(sample_shape=(28, 28, 1)),
         net.layers.Convolution2D(nb_filter=10, nb_row=28, nb_col=28),
@@ -35,12 +36,29 @@ def main():
 
     model = net.models.Model(layers)
 
-    start = time.time()
+    batch_size = 32
+    epochs = 20
 
-    result = model.predict(batch)
-    print(result.shape)
+    print("Accuracy: {}".format(model.get_accuracy(X_test, y_test)))
 
-    print("Prediction took {:.2f} seconds".format(time.time() - start))
+    for epoch in range(epochs):
+
+        print("Epoch {}".format(epoch))
+
+        X_train, y_train = sklearn.utils.shuffle(X_train, y_train)
+
+        batches_count = len(X_train[:10000]) // batch_size
+
+        for batch_index in tqdm.tqdm(range(batches_count)):
+
+            x_batch = X_train[batch_index * batch_size: (batch_index + 1) * batch_size]
+            y_batch = y_train[batch_index * batch_size: (batch_index + 1) * batch_size]
+
+            model.train(x_batch, y_batch, learning_rate=0.01)
+
+        print("Accuracy: {}".format(model.get_accuracy(X_test, y_test)))
+
+
 
 
 if __name__ == "__main__":
