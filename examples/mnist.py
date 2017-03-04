@@ -59,8 +59,6 @@ def main():
         print("Accuracy: {}".format(model.get_accuracy(X_test, y_test)))
 
 
-
-
 if __name__ == "__main__":
 
     main()

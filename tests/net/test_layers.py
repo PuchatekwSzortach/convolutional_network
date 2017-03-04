@@ -1001,3 +1001,106 @@ class TestConvolution2D:
 
         assert np.all(expected_kernels == convolution.kernels)
 
+    def test_train_backward_two_3x3x2_images_one_2x2x2_kernel(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution.build(input_shape=(None, 3, 3, 2))
+
+        first_image_first_channel = np.array([
+            [1, 0, 2],
+            [1, -2, 3],
+            [-2, 0, 3]
+        ])
+
+        first_image_second_channel = np.array([
+            [1, 1, -4],
+            [3, 0, 2],
+            [-1, -1, 2]
+        ])
+
+        first_image = np.dstack([first_image_first_channel, first_image_second_channel])
+
+        second_image_first_channel = np.array([
+            [-1, 2, 0],
+            [1, 1, 1],
+            [0, 0, 3]
+        ])
+
+        second_image_second_channel = np.array([
+            [2, 0, -1],
+            [1, 1, 0],
+            [-1, -1, 1]
+        ])
+
+        second_image = np.dstack([second_image_first_channel, second_image_second_channel])
+
+        images = np.array([first_image, second_image])
+
+        kernel_first_channel = np.array([
+            [1, 2],
+            [-1, 0]
+        ])
+
+        kernel_second_channel = np.array([
+            [0, 6],
+            [-3, 0]
+        ])
+
+        kernel = np.dstack([kernel_first_channel, kernel_second_channel]).reshape(1, 2, 2, 2)
+
+        # Overwrite kernels with known values
+        convolution.kernels = kernel
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([2], dtype=np.float32)
+
+        expected_first_activation = np.array([
+            [0, 0],
+            [4, 21]
+        ]).reshape(2, 2, 1)
+
+        expected_second_activation = np.array([
+            [1, 0],
+            [14, 8]
+        ]).reshape(2, 2, 1)
+
+        expected_activation = np.array([expected_first_activation, expected_second_activation])
+
+        actual_activation = convolution.train_forward(images)
+
+        assert np.all(expected_activation == actual_activation)
+
+        first_image_gradients = np.array([
+            [2, -2],
+            [1, 1]
+        ]).reshape(2, 2, 1)
+
+        second_image_gradients = np.array([
+            [3, 1],
+            [-1, 2]
+        ]).reshape(2, 2, 1)
+
+        gradients = np.array([first_image_gradients, second_image_gradients])
+
+        learning_rate = 2
+
+        convolution.train_backward(gradients, learning_rate)
+
+        expected_biases = np.array([-8])
+
+        assert np.all(expected_biases == convolution.biases)
+
+        expected_kernels_first_channel = np.array([
+            [-1, -7],
+            [-5, -9]
+        ])
+
+        expected_kernels_second_channel = np.array([
+            [-13, 3],
+            [-9, -6]
+        ])
+
+        expected_kernels = np.dstack(
+            [expected_kernels_first_channel, expected_kernels_second_channel]).reshape(1, 2, 2, 2)
+
+        assert np.all(expected_kernels == convolution.kernels)

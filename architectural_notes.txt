@@ -84,12 +84,13 @@ Checked cases:
 - forward convolution - 2 images 3x3, 2 kernels 2x2
 - two images 2x2x1, 1 kernel 2x2x1
 - two images 2x2x2, 1 kernel 2x2x2
+- two images 3x3x2, 1 kernel 2x2x2
 
 Not yet checked cases:
-- two images 3x3x1, 1 kernel 2x2x1
 - two images 3x3x2, 2 kernels 2x2x2
 
 Further tests needed:
-- pass gradients from convolutional layer to upstream layer
+- pass gradients from convolutional layer to upstream layer - including cases where not every pixel in upstream layer
+contributed to every pixel in downstream layer
 - test model.train()
 - add model.fit()
