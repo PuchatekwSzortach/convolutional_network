@@ -47,7 +47,7 @@ def main():
 
         X_train, y_train = sklearn.utils.shuffle(X_train, y_train)
 
-        batches_count = len(X_train[:10000]) // batch_size
+        batches_count = len(X_train) // batch_size
 
         for batch_index in tqdm.tqdm(range(batches_count)):
 

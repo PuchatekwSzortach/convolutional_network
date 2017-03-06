@@ -133,6 +133,8 @@ class Convolution2D(Layer):
         self.kernels = None
         self.biases = None
 
+        self.last_preactivation = None
+
     def build(self, input_shape):
 
         if len(input_shape) != 4:
@@ -186,14 +188,14 @@ class Convolution2D(Layer):
 
         self.last_input = x
 
-        preactivation = self.get_preactivation(x)
-        self.last_output = self.relu(preactivation)
+        self.last_preactivation = self.get_preactivation(x)
+        self.last_output = self.relu(self.last_preactivation)
 
         return self.last_output
 
     def train_backward(self, gradients, learning_rate):
 
-        preactivation_error_gradients = gradients * self.relu_derivative(gradients)
+        preactivation_error_gradients = gradients * self.relu_derivative(self.last_preactivation)
 
         for kernel_index in range(len(self.kernels)):
 
@@ -236,7 +238,8 @@ class Convolution2D(Layer):
                     # Compute gradients for each image
                     for image_index in range(len(inputs_patches)):
 
-                        weight_errors_gradients = kernel_preactivation_error_gradients[image_index] * inputs_patches[image_index]
+                        weight_errors_gradients = kernel_preactivation_error_gradients[image_index] * \
+                                                  inputs_patches[image_index]
 
                         total_gradient_change += np.sum(weight_errors_gradients)
 
