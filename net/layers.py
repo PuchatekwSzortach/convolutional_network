@@ -142,6 +142,8 @@ class Convolution2D(Layer):
             raise ValueError("Input shape {} isn't 4-dimensional".format(input_shape))
 
         self.input_shape = input_shape
+
+        # Dimensions are [images, rows, columns, filters]
         self.output_shape = (None, input_shape[1] - self.nb_row + 1, input_shape[2] - self.nb_col + 1, self.nb_filter)
 
         input_channels = input_shape[-1]
@@ -163,16 +165,20 @@ class Convolution2D(Layer):
 
         preactivation = np.zeros(shape=(x.shape[0],) + self.output_shape[1:])
 
+        # For each image
         for sample_index, sample in enumerate(x):
 
+            # For each filter
             for kernel_index, (kernel, bias) in enumerate(zip(self.kernels, self.biases)):
 
                 for row_index in range(0, x.shape[1] - self.nb_row + 1):
 
                     for col_index in range(0, x.shape[2] - self.nb_col + 1):
+
                         input_patch = sample[row_index: row_index + self.nb_row, col_index: col_index + self.nb_col, :]
 
-                        preactivation[sample_index, row_index, col_index, kernel_index] = np.sum(input_patch * kernel) + bias
+                        preactivation[sample_index, row_index, col_index, kernel_index] = \
+                            np.sum(input_patch * kernel) + bias
 
         return preactivation
 
@@ -200,7 +206,7 @@ class Convolution2D(Layer):
         for kernel_index in range(len(self.kernels)):
 
             # Select gradients that were affected by current kernel
-            # Result is a 3D tensor with dimensions (y, x, z)
+            # Dimensions are [image, rows, cols]
             kernel_preactivation_error_gradients = preactivation_error_gradients[:, :, :, kernel_index]
 
             self.update_bias(kernel_preactivation_error_gradients, kernel_index, learning_rate)
@@ -208,7 +214,10 @@ class Convolution2D(Layer):
 
     def update_bias(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
 
+        # Sum contributions for each image
         bias_error_gradients_sums = np.sum(kernel_preactivation_error_gradients, axis=(1, 2))
+
+        # And take mean across contributions to different images
         mean_bias_error_gradient = np.mean(bias_error_gradients_sums)
 
         self.biases[kernel_index] -= learning_rate * mean_bias_error_gradient
@@ -233,18 +242,20 @@ class Convolution2D(Layer):
                                   input_column_start: input_column_end,
                                   z]
 
-                    total_gradient_change = 0
+                    total_kernel_weight_gradient = 0
 
                     # Compute gradients for each image
                     for image_index in range(len(inputs_patches)):
 
-                        weight_errors_gradients = kernel_preactivation_error_gradients[image_index] * \
-                                                  inputs_patches[image_index]
+                        kernel_weight_gradients_for_current_image = \
+                            kernel_preactivation_error_gradients[image_index] * inputs_patches[image_index]
 
-                        total_gradient_change += np.sum(weight_errors_gradients)
+                        total_kernel_weight_gradient += np.sum(kernel_weight_gradients_for_current_image)
 
-                    weight_indices = (kernel_index, y, x, z)
-                    self.kernels[weight_indices] -= learning_rate * total_gradient_change / len(inputs_patches)
+                    weight_index = (kernel_index, y, x, z)
+
+                    # Update kernel weight using mean gradient across images
+                    self.kernels[weight_index] -= learning_rate * total_kernel_weight_gradient / len(inputs_patches)
 
 
 class Softmax:
