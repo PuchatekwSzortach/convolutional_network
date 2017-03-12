@@ -1,5 +1,5 @@
 """
-A simple MNIST network with a single hidden layer
+A simple MNIST network with two hidden layers
 """
 import time
 
@@ -29,7 +29,8 @@ def main():
 
     layers = [
         net.layers.Input(sample_shape=(28, 28, 1)),
-        net.layers.Convolution2D(nb_filter=10, nb_row=28, nb_col=28),
+        net.layers.Convolution2D(nb_filter=20, nb_row=14, nb_col=14),
+        net.layers.Convolution2D(nb_filter=10, nb_row=15, nb_col=15),
         net.layers.Flatten(),
         net.layers.Softmax()
     ]
@@ -39,7 +40,7 @@ def main():
     batch_size = 32
     epochs = 20
 
-    print("Accuracy: {}".format(model.get_accuracy(X_test, y_test)))
+    print("Accuracy: {}".format(model.get_accuracy(X_test[:100], y_test[:100])))
 
     for epoch in range(epochs):
 
@@ -47,7 +48,7 @@ def main():
 
         X_train, y_train = sklearn.utils.shuffle(X_train, y_train)
 
-        batches_count = len(X_train) // batch_size
+        batches_count = len(X_train[:1000]) // batch_size
 
         for batch_index in tqdm.tqdm(range(batches_count)):
 
