@@ -75,19 +75,14 @@ I need train_backward(correct_labels)
 
 Convolution backpropagation:
 
-Checked cases:
-- one image 2x2x1, 1 kernel 2x2
-- one image 3x3x1, 1 kernel 2x2
-- one image 2x2x2, 3 kernels 2x2
-- one image 3x3x2, 2 kernels 2x2
-- forward convolution - 2 images 2x2, 1 kernel 2x2
-- forward convolution - 2 images 3x3, 2 kernels 2x2
-- two images 2x2x1, 1 kernel 2x2x1
-- two images 2x2x2, 1 kernel 2x2x2
-- two images 3x3x2, 1 kernel 2x2x2
 
 Not yet checked cases:
-- two images 3x3x2, 2 kernels 2x2x2
+
+Ok, tests we need for computing (and passing!) dC/da(l-1):
+- all the existing tests - we can add gradients checks to them
+- a larger case - say 3x3 kernel and 4x4 result, so 6x6 previous layer... I guess
+
+
 
 Further tests needed:
 - pass gradients from convolutional layer to upstream layer - including cases where not every pixel in upstream layer

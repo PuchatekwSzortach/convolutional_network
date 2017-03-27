@@ -203,6 +203,9 @@ class Convolution2D(Layer):
 
         preactivation_error_gradients = gradients * self.relu_derivative(self.last_preactivation)
 
+        # Copy old kernels, we will use original values when computing image gradients
+        old_kernels = self.kernels.copy()
+
         for kernel_index in range(len(self.kernels)):
 
             # Select gradients that were affected by current kernel
@@ -211,6 +214,18 @@ class Convolution2D(Layer):
 
             self.update_bias(kernel_preactivation_error_gradients, kernel_index, learning_rate)
             self.update_kernel_weights(kernel_preactivation_error_gradients, kernel_index, learning_rate)
+
+        image_gradients = np.zeros_like(self.last_input, dtype=np.float32)
+
+        for image_index in range(len(self.last_input)):
+
+            for kernel_index in range(len(self.kernels)):
+
+                kernel = old_kernels[kernel_index]
+
+                image_gradients[image_index] = preactivation_error_gradients * kernel
+
+        return image_gradients
 
     def update_bias(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
 
