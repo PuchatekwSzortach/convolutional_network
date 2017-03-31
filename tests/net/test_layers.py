@@ -597,56 +597,67 @@ class TestConvolution2D:
         ]).reshape(1, 2, 2, 1)
 
         assert np.all(expected_image_gradients == actual_image_gradients)
-    #
-    # def test_train_backward_simple_one_input_channel_and_one_output_channel_single_sample_3x3_image(self):
-    #
-    #     convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
-    #     convolution.build(input_shape=(None, 3, 3, 1))
-    #
-    #     image = np.array([
-    #         [2, 0, -1],
-    #         [1, 1, 2],
-    #         [3, -2, 0]
-    #     ]).reshape((1, 3, 3, 1))
-    #
-    #     kernel = np.array([
-    #         [2, -2],
-    #         [0, 1]
-    #     ], dtype=np.float32).reshape(1, 2, 2, 1)
-    #
-    #     # Overwrite kernels with known values
-    #     convolution.kernels = kernel
-    #
-    #     # Overwrite biases with known values
-    #     convolution.biases = np.array([4], dtype=np.float32)
-    #
-    #     expected_activation = np.array([
-    #         [9, 8],
-    #         [2, 2]
-    #     ]).reshape(1, 2, 2, 1)
-    #
-    #     actual_activation = convolution.train_forward(image)
-    #
-    #     assert np.all(expected_activation == actual_activation)
-    #
-    #     gradients = np.array([
-    #         [1, 2],
-    #         [-1, -2]
-    #     ]).reshape(1, 2, 2, 1)
-    #
-    #     learning_rate = 1
-    #
-    #     convolution.train_backward(gradients, learning_rate)
-    #
-    #     expected_biases = np.array([4])
-    #
-    #     expected_kernels = np.array([
-    #         [3, 5],
-    #         [-4, -6]
-    #     ]).reshape(1, 2, 2, 1)
-    #
-    #     assert np.all(expected_biases == convolution.biases)
-    #     assert np.all(expected_kernels == convolution.kernels)
+
+    def test_train_backward_simple_one_input_channel_and_one_output_channel_single_sample_3x3_image(self):
+
+        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution.build(input_shape=(None, 3, 3, 1))
+
+        image = np.array([
+            [2, 0, -1],
+            [1, 1, 2],
+            [3, -2, 0]
+        ]).reshape((1, 3, 3, 1))
+
+        kernel = np.array([
+            [2, -2],
+            [0, 1]
+        ], dtype=np.float32).reshape(1, 2, 2, 1)
+
+        # Overwrite kernels with known values
+        convolution.kernels = kernel
+
+        # Overwrite biases with known values
+        convolution.biases = np.array([4], dtype=np.float32)
+
+        expected_activation = np.array([
+            [9, 8],
+            [2, 2]
+        ]).reshape(1, 2, 2, 1)
+
+        actual_activation = convolution.train_forward(image)
+
+        assert np.all(expected_activation == actual_activation)
+
+        gradients = np.array([
+            [1, 2],
+            [-1, -2]
+        ]).reshape(1, 2, 2, 1)
+
+        learning_rate = 1
+
+        # convolution.train_backward(gradients, learning_rate)
+
+        # expected_biases = np.array([4])
+        #
+        # expected_kernels = np.array([
+        #     [3, 5],
+        #     [-4, -6]
+        # ]).reshape(1, 2, 2, 1)
+        #
+        # assert np.all(expected_biases == convolution.biases)
+        # assert np.all(expected_kernels == convolution.kernels)
+        #
+        # print("ADD IMAGE GRADIENTS CHECKS")
+        #
+        # expected_image_gradients = np.array([
+        #     [2, 2, -4],
+        #     [-2, -1, 6],
+        #     [0, -1, -2]
+        # ]).reshape(1, 3, 3, 1)
+        #
+        # assert 1 == 2
+
     #
     # def test_train_backward_2x2x2_image_3_filters(self):
     #

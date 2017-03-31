@@ -156,12 +156,12 @@ class Convolution2D(Layer):
 
     def forward(self, x):
 
-        preactivation = self.get_preactivation(x)
+        preactivation = self._get_preactivation(x)
 
         # Apply ReLU activation
-        return self.relu(preactivation)
+        return self._relu(preactivation)
 
-    def get_preactivation(self, x):
+    def _get_preactivation(self, x):
 
         preactivation = np.zeros(shape=(x.shape[0],) + self.output_shape[1:])
 
@@ -182,11 +182,11 @@ class Convolution2D(Layer):
 
         return preactivation
 
-    def relu(self, x):
+    def _relu(self, x):
 
         return x * (x > 0)
 
-    def relu_derivative(self, x):
+    def _relu_derivative(self, x):
 
         return 1 * (x > 0)
 
@@ -194,40 +194,22 @@ class Convolution2D(Layer):
 
         self.last_input = x
 
-        self.last_preactivation = self.get_preactivation(x)
-        self.last_output = self.relu(self.last_preactivation)
+        self.last_preactivation = self._get_preactivation(x)
+        self.last_output = self._relu(self.last_preactivation)
 
         return self.last_output
 
     def train_backward(self, gradients, learning_rate):
 
-        preactivation_error_gradients = gradients * self.relu_derivative(self.last_preactivation)
+        preactivation_error_gradients = gradients * self._relu_derivative(self.last_preactivation)
 
         # Copy old kernels, we will use original values when computing image gradients
         old_kernels = self.kernels.copy()
+        
+        self._update_kernels(preactivation_error_gradients, learning_rate)
+        return self._get_image_gradients(preactivation_error_gradients, old_kernels)
 
-        for kernel_index in range(len(self.kernels)):
-
-            # Select gradients that were affected by current kernel
-            # Dimensions are [image, rows, cols]
-            kernel_preactivation_error_gradients = preactivation_error_gradients[:, :, :, kernel_index]
-
-            self.update_bias(kernel_preactivation_error_gradients, kernel_index, learning_rate)
-            self.update_kernel_weights(kernel_preactivation_error_gradients, kernel_index, learning_rate)
-
-        image_gradients = np.zeros_like(self.last_input, dtype=np.float32)
-
-        for image_index in range(len(self.last_input)):
-
-            for kernel_index in range(len(self.kernels)):
-
-                kernel = old_kernels[kernel_index]
-
-                image_gradients[image_index] = preactivation_error_gradients * kernel
-
-        return image_gradients
-
-    def update_bias(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
+    def _update_bias(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
 
         # Sum contributions for each image
         bias_error_gradients_sums = np.sum(kernel_preactivation_error_gradients, axis=(1, 2))
@@ -237,7 +219,18 @@ class Convolution2D(Layer):
 
         self.biases[kernel_index] -= learning_rate * mean_bias_error_gradient
 
-    def update_kernel_weights(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
+    def _update_kernels(self, preactivation_error_gradients, learning_rate):
+
+        for kernel_index in range(len(self.kernels)):
+
+            # Select gradients that were affected by current kernel
+            # Dimensions are [image, rows, cols]
+            kernel_preactivation_error_gradients = preactivation_error_gradients[:, :, :, kernel_index]
+
+            self._update_bias(kernel_preactivation_error_gradients, kernel_index, learning_rate)
+            self._update_kernel_weights(kernel_preactivation_error_gradients, kernel_index, learning_rate)
+
+    def _update_kernel_weights(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
 
         for y in range(self.nb_row):
 
@@ -271,6 +264,19 @@ class Convolution2D(Layer):
 
                     # Update kernel weight using mean gradient across images
                     self.kernels[weight_index] -= learning_rate * total_kernel_weight_gradient / len(inputs_patches)
+
+    def _get_image_gradients(self, preactivation_error_gradients, kernels):
+
+        image_gradients = np.zeros_like(self.last_input, dtype=np.float32)
+
+        for image_index in range(len(self.last_input)):
+
+            for kernel_index in range(len(self.kernels)):
+                kernel = kernels[kernel_index]
+
+                image_gradients[image_index] = preactivation_error_gradients * kernel
+
+        return image_gradients
 
 
 class Softmax:
