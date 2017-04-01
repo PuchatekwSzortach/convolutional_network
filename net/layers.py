@@ -205,7 +205,7 @@ class Convolution2D(Layer):
 
         # Copy old kernels, we will use original values when computing image gradients
         old_kernels = self.kernels.copy()
-        
+
         self._update_kernels(preactivation_error_gradients, learning_rate)
         return self._get_image_gradients(preactivation_error_gradients, old_kernels)
 
@@ -271,10 +271,40 @@ class Convolution2D(Layer):
 
         for image_index in range(len(self.last_input)):
 
-            for kernel_index in range(len(self.kernels)):
-                kernel = kernels[kernel_index]
+            image = self.last_input[image_index]
 
-                image_gradients[image_index] = preactivation_error_gradients * kernel
+            for y in range(image.shape[0]):
+
+                for x in range(image.shape[1]):
+
+                    # Select all kernel weights this pixel was convolved with
+                    # TODO: Work on all kernels - we will write tests that force us to do that later
+                    # TODO: Work on all channels of the image, for now we are only addressing a single channel case
+                    kernel = kernels[0, :, :, 0]
+
+                    # Get subkernel with which pixel at image[y,x] is convolved with
+                    subkernel_y_start = max(0, y - self.last_preactivation.shape[1] + 1)
+                    subkernel_x_start = max(0, x - self.last_preactivation.shape[2] + 1)
+
+                    subkernel_y_end = min(kernel.shape[0], y + 1)
+                    subkernel_x_end = min(kernel.shape[1], x + 1)
+
+                    # print("I[{},{}] convolved with kernel from [{}:{}, {}:{}]".format(
+                    #     y, x, subkernel_y_start, subkernel_y_end, subkernel_x_start, subkernel_x_end
+                    # ))
+
+                    subkernel = kernel[subkernel_y_start:subkernel_y_end, subkernel_x_start:subkernel_x_end]
+
+                    affected_preactivation_subwindow = np.zeros(shape=subkernel.shape)
+
+                    for subwindow_index_y, kernel_y in enumerate(range(subkernel_y_start, subkernel_y_end)):
+
+                        for subwindow_index_x, kernel_x in enumerate(range(subkernel_x_start, subkernel_x_end)):
+
+                            affected_preactivation_subwindow[subwindow_index_y, subwindow_index_x] = \
+                                preactivation_error_gradients[image_index, y - kernel_y, x - kernel_x, 0]
+
+                    image_gradients[image_index, y, x, 0] = np.sum(affected_preactivation_subwindow * subkernel)
 
         return image_gradients
 

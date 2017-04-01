@@ -636,27 +636,25 @@ class TestConvolution2D:
 
         learning_rate = 1
 
-        # convolution.train_backward(gradients, learning_rate)
+        actual_image_gradients = convolution.train_backward(gradients, learning_rate)
 
-        # expected_biases = np.array([4])
-        #
-        # expected_kernels = np.array([
-        #     [3, 5],
-        #     [-4, -6]
-        # ]).reshape(1, 2, 2, 1)
-        #
-        # assert np.all(expected_biases == convolution.biases)
-        # assert np.all(expected_kernels == convolution.kernels)
-        #
-        # print("ADD IMAGE GRADIENTS CHECKS")
-        #
-        # expected_image_gradients = np.array([
-        #     [2, 2, -4],
-        #     [-2, -1, 6],
-        #     [0, -1, -2]
-        # ]).reshape(1, 3, 3, 1)
-        #
-        # assert 1 == 2
+        expected_biases = np.array([4])
+
+        expected_kernels = np.array([
+            [3, 5],
+            [-4, -6]
+        ]).reshape(1, 2, 2, 1)
+
+        assert np.all(expected_biases == convolution.biases)
+        assert np.all(expected_kernels == convolution.kernels)
+
+        expected_image_gradients = np.array([
+            [2, 2, -4],
+            [-2, -1, 6],
+            [0, -1, -2]
+        ]).reshape(1, 3, 3, 1)
+
+        assert np.all(expected_image_gradients == actual_image_gradients)
 
     #
     # def test_train_backward_2x2x2_image_3_filters(self):
