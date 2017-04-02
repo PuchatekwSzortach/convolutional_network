@@ -779,13 +779,19 @@ class TestConvolution2D:
         assert np.all(expected_kernels == convolution.kernels)
 
         expected_image_gradients_first_channel = np.array([
-            [-24, 24],
-            [8, 16]
+            [6, 6],
+            [-4, -2]
         ])
 
         print()
+        print("expected_image_gradients_first_channel")
         print(expected_image_gradients_first_channel)
+
+        print("actual_image_gradients first channel")
         print(actual_image_gradients[0, :, :, 0])
+
+        print("actual_image_gradients second channel")
+        print(actual_image_gradients[0, :, :, 1])
 
         # expected_image_gradients = np.array([
         #     []
