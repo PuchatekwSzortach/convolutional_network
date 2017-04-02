@@ -267,44 +267,61 @@ class Convolution2D(Layer):
 
     def _get_image_gradients(self, preactivation_error_gradients, kernels):
 
+        # Tensor for storing error gradients on input image
         image_gradients = np.zeros_like(self.last_input, dtype=np.float32)
 
+        print()
+
+        # For each image from last input batch
         for image_index in range(len(self.last_input)):
 
             image = self.last_input[image_index]
 
+            # For each column
             for y in range(image.shape[0]):
 
+                # For each row
                 for x in range(image.shape[1]):
 
                     # Select all kernel weights this pixel was convolved with
                     # TODO: Work on all kernels - we will write tests that force us to do that later
                     # TODO: Work on all channels of the image, for now we are only addressing a single channel case
-                    kernel = kernels[0, :, :, 0]
 
-                    # Get subkernel with which pixel at image[y,x] is convolved with
+                    # kernels ordering is: (self.nb_filter, self.nb_row, self.nb_col, input_channels)
+
+                    # Get start and end indices for part of kernel tensor that pixels I[y,x] was convolved with
                     subkernel_y_start = max(0, y - self.last_preactivation.shape[1] + 1)
                     subkernel_x_start = max(0, x - self.last_preactivation.shape[2] + 1)
 
-                    subkernel_y_end = min(kernel.shape[0], y + 1)
-                    subkernel_x_end = min(kernel.shape[1], x + 1)
+                    subkernel_y_end = min(kernels.shape[1], y + 1)
+                    subkernel_x_end = min(kernels.shape[2], x + 1)
 
                     # print("I[{},{}] convolved with kernel from [{}:{}, {}:{}]".format(
                     #     y, x, subkernel_y_start, subkernel_y_end, subkernel_x_start, subkernel_x_end
                     # ))
 
-                    subkernel = kernel[subkernel_y_start:subkernel_y_end, subkernel_x_start:subkernel_x_end]
+                    for input_channel_index in range(self.last_input.shape[-1]):
 
-                    affected_preactivation_subwindow = np.zeros(shape=subkernel.shape)
+                        contribution = 0
 
-                    for subwindow_index_y, kernel_y in enumerate(range(subkernel_y_start, subkernel_y_end)):
+                        for subwindow_index_y, kernel_y in enumerate(range(subkernel_y_start, subkernel_y_end)):
 
-                        for subwindow_index_x, kernel_x in enumerate(range(subkernel_x_start, subkernel_x_end)):
+                            for subwindow_index_x, kernel_x in enumerate(range(subkernel_x_start, subkernel_x_end)):
 
-                            affected_preactivation_subwindow[subwindow_index_y, subwindow_index_x] = \
-                                preactivation_error_gradients[image_index, y - kernel_y, x - kernel_x, 0]
+                                for filter_index in range(kernels.shape[0]):
 
-                    image_gradients[image_index, y, x, 0] = np.sum(affected_preactivation_subwindow * subkernel)
+                                    preactivaton_indices = (image_index, y - kernel_y, x - kernel_x, input_channel_index)
+                                    # print("Prectivation indices are {}".format(preactivaton_indices))
+
+                                    kernel_indices = (filter_index, kernel_y, kernel_x, input_channel_index)
+                                    # print("kernel_indices indices are {}".format(kernel_indices))
+
+                                    contribution += preactivation_error_gradients[preactivaton_indices] * \
+                                                    kernels[kernel_indices]
+
+                        image_gradients[image_index, y, x, input_channel_index] = contribution
+
+                    # print()
 
         return image_gradients
 
