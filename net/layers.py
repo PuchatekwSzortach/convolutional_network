@@ -203,9 +203,6 @@ class Convolution2D(Layer):
 
         preactivation_error_gradients = gradients * self._relu_derivative(self.last_preactivation)
 
-        print("preactivation_error_gradients are: ")
-        print(preactivation_error_gradients)
-
         # Copy old kernels, we will use original values when computing image gradients
         old_kernels = self.kernels.copy()
 
@@ -273,8 +270,6 @@ class Convolution2D(Layer):
         # Tensor for storing error gradients on input image
         image_gradients = np.zeros_like(self.last_input, dtype=np.float32)
 
-        print()
-
         # For each image from last input batch
         for image_index in range(len(self.last_input)):
 
@@ -299,15 +294,9 @@ class Convolution2D(Layer):
                     subkernel_y_end = min(kernels.shape[1], y + 1)
                     subkernel_x_end = min(kernels.shape[2], x + 1)
 
-                    print("I[{},{}] convolved with kernel from [{}:{}, {}:{}]".format(
-                        y, x, subkernel_y_start, subkernel_y_end, subkernel_x_start, subkernel_x_end
-                    ))
-
                     for input_channel_index in range(self.last_input.shape[-1]):
 
                         contribution = 0
-
-                        print("\tChannel {}".format(input_channel_index))
 
                         for kernel_y in range(subkernel_y_start, subkernel_y_end):
 
@@ -316,25 +305,13 @@ class Convolution2D(Layer):
                                 for filter_index in range(kernels.shape[0]):
 
                                     preactivation_indices = (image_index, y - kernel_y, x - kernel_x, filter_index)
-                                    print("\t\tPrectivation[{}] is {}".format(
-                                        preactivation_indices, preactivation_error_gradients[preactivation_indices]))
-
                                     kernel_indices = (filter_index, kernel_y, kernel_x, input_channel_index)
-                                    print("\t\tKernel[{}] is {}".format(
-                                        kernel_indices, kernels[kernel_indices]))
 
                                     contribution += preactivation_error_gradients[preactivation_indices] * \
                                                     kernels[kernel_indices]
 
                         image_gradients_index = (image_index, y, x, input_channel_index)
-
-                        print("Writing into image_gradients[{}] value {}".format(image_gradients_index, contribution))
-
                         image_gradients[image_gradients_index] = contribution
-
-                    print()
-
-                print()
 
         return image_gradients
 
