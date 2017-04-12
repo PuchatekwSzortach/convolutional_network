@@ -105,4 +105,7 @@ Added a change to compute image gradients over all input channels at once for a 
 
 Now _update_kernel_weights is the main bottleneck
 
+Changed _update_kernel_weights to compute kernel weight updates using error derivatives for all images in a vectorized fashion,
+cutting down computational time by another 25% - now performance script takes 3 seconds
+
 

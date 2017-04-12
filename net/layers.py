@@ -250,16 +250,15 @@ class Convolution2D(Layer):
                                   input_column_start: input_column_end,
                                   z]
 
-                    total_kernel_weight_gradient = 0
-
                     # Compute gradients for each image
-                    for image_index in range(len(inputs_patches)):
+                    # for image_index in range(len(inputs_patches)):
+                    #
+                    #     kernel_weight_gradients_for_current_image = \
+                    #         kernel_preactivation_error_gradients[image_index] * inputs_patches[image_index]
+                    #
+                    #     total_kernel_weight_gradient += np.sum(kernel_weight_gradients_for_current_image)
 
-                        kernel_weight_gradients_for_current_image = \
-                            kernel_preactivation_error_gradients[image_index] * inputs_patches[image_index]
-
-                        total_kernel_weight_gradient += np.sum(kernel_weight_gradients_for_current_image)
-
+                    total_kernel_weight_gradient = np.sum(kernel_preactivation_error_gradients * inputs_patches)
                     weight_index = (kernel_index, y, x, z)
 
                     # Update kernel weight using mean gradient across images
