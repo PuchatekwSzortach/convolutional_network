@@ -100,3 +100,9 @@ Current implementation: 6 seconds
 Main bottlenecks:
 - _get_image_gradients
 - _update_kernel_weights
+
+Added a change to compute image gradients over all input channels at once for a 25% speedup - now 4~4.5 sec
+
+Now _update_kernel_weights is the main bottleneck
+
+

@@ -299,13 +299,11 @@ class Convolution2D(Layer):
 
                             for kernel_x in range(subkernel_x_start, subkernel_x_end):
 
-                                for filter_index in range(kernels.shape[0]):
+                                preactivation_indices = (image_index, y - kernel_y, x - kernel_x, slice(None))
+                                kernel_indices = (slice(None), kernel_y, kernel_x, input_channel_index)
 
-                                    preactivation_indices = (image_index, y - kernel_y, x - kernel_x, filter_index)
-                                    kernel_indices = (filter_index, kernel_y, kernel_x, input_channel_index)
-
-                                    contribution += preactivation_error_gradients[preactivation_indices] * \
-                                                    kernels[kernel_indices]
+                                contribution += np.sum(preactivation_error_gradients[preactivation_indices] *
+                                                       kernels[kernel_indices])
 
                         image_gradients_index = (image_index, y, x, input_channel_index)
                         image_gradients[image_gradients_index] = contribution
