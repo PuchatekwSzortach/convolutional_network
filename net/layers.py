@@ -282,9 +282,6 @@ class Convolution2D(Layer):
                 for x in range(image.shape[1]):
 
                     # Select all kernel weights this pixel was convolved with
-                    # TODO: Work on all kernels - we will write tests that force us to do that later
-                    # TODO: Work on all channels of the image, for now we are only addressing a single channel case
-
                     # kernels ordering is: (self.nb_filter, self.nb_row, self.nb_col, input_channels)
 
                     # Get start and end indices for part of kernel tensor that pixels I[y,x] was convolved with

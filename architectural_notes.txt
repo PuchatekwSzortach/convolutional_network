@@ -89,3 +89,14 @@ Further tests needed:
 contributed to every pixel in downstream layer
 - test model.train()
 - add model.fit()
+
+Performance at 100 batches:
+Single layer: 0.54 after first epoch, 0.73 after third epoch
+
+Ok, now try to work on speeding our convolutional network up a bit.
+
+Current implementation: 6 seconds
+
+Main bottlenecks:
+- _get_image_gradients
+- _update_kernel_weights
