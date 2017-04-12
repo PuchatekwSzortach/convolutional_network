@@ -296,13 +296,18 @@ class Convolution2D(Layer):
 
                         for kernel_y in range(subkernel_y_start, subkernel_y_end):
 
-                            for kernel_x in range(subkernel_x_start, subkernel_x_end):
+                            # Select indices of all elements at current row that were affected by examined image pixel
+                            x_indices = list(range(x - subkernel_x_start, x - subkernel_x_end, -1))
+                            error_patch = preactivation_error_gradients[image_index, y - kernel_y, x_indices, :]
 
-                                preactivation_indices = (image_index, y - kernel_y, x - kernel_x, slice(None))
-                                kernel_indices = (slice(None), kernel_y, kernel_x, input_channel_index)
+                            # Select appropriate row of all kernels and roll channel axis to last dimension,
+                            # since error_patch has channels along last index,
+                            # while kernel patch has channels in first index
+                            kernel_row = np.rollaxis(
+                                kernels[:, kernel_y, subkernel_x_start:subkernel_x_end, input_channel_index], 0, 2)
 
-                                contribution += np.sum(preactivation_error_gradients[preactivation_indices] *
-                                                       kernels[kernel_indices])
+                            row_contribution = np.sum(error_patch * kernel_row)
+                            contribution += row_contribution
 
                         image_gradients_index = (image_index, y, x, input_channel_index)
                         image_gradients[image_gradients_index] = contribution

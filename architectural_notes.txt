@@ -106,6 +106,12 @@ Added a change to compute image gradients over all input channels at once for a 
 Now _update_kernel_weights is the main bottleneck
 
 Changed _update_kernel_weights to compute kernel weight updates using error derivatives for all images in a vectorized fashion,
-cutting down computational time by another 25% - now performance script takes 3 seconds
+cutting down computational time by another 25% - now performance script takes 3 seconds and 12 mins for multi mnist
 
+Now bottlenecks are:
+- _get_image_gradients
+- _update_kernel_weights
+
+Changed _get_image_gradients to make computations across a whole row for a single image pixel gradient update in a vectorized form
+ for a ~25% speedup. 2.2 sec on performance script and 8 min on mnist_multilayer
 
