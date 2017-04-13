@@ -34,11 +34,11 @@ def main():
 
     model = net.models.Model(layers)
 
-    batch_size = 2
+    batch_size = 4
 
     start = time.time()
 
-    for batch_index in tqdm.tqdm(range(4)):
+    for batch_index in tqdm.tqdm(range(8)):
 
         x_batch = X_train[batch_index * batch_size: (batch_index + 1) * batch_size]
         y_batch = y_train[batch_index * batch_size: (batch_index + 1) * batch_size]

@@ -124,3 +124,5 @@ Performance script not takes 1.8sec and mnist_multilayer 6 mins
 Change kernel addressing for image gradient computations so that entire subkernel and corresponding error patch
 are addressed with slicing for another 25% speed increase. PErformance script now takes 1.5 sec to compute and multilayer
 script 4.5 min
+
+Bumped up computations size of performance script so it now takes 4.5sec

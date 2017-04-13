@@ -4,61 +4,12 @@ Few MNIST networks based on Keras
 
 import os
 
+import tqdm
 import keras
 import keras.datasets.mnist
 import keras.utils.np_utils
 import numpy as np
-
-
-def get_single_layer_model(input_shape):
-    """
-    7850 parameters.
-    Should get about 83%~92% accuracy
-    """
-
-    input = keras.layers.Input(shape=input_shape)
-
-    x = keras.layers.Convolution2D(nb_filter=10, nb_row=28, nb_col=28, activation='relu')(input)
-
-    x = keras.layers.Flatten()(x)
-    x = keras.layers.Activation('softmax')(x)
-
-    return keras.models.Model(input, x)
-
-
-def get_two_layers_model(input_shape):
-    """
-    8280 parameters
-    Should get about 74%~96% accuracy
-    """
-
-    input = keras.layers.Input(shape=input_shape)
-
-    x = keras.layers.Convolution2D(nb_filter=10, nb_row=4, nb_col=4, subsample=(3, 3), activation='relu')(input)
-    x = keras.layers.Convolution2D(nb_filter=10, nb_row=9, nb_col=9, activation='relu')(x)
-
-    x = keras.layers.Flatten()(x)
-    x = keras.layers.Activation('softmax')(x)
-
-    return keras.models.Model(input, x)
-
-
-def get_three_layers_model(input_shape):
-    """
-    1990 parameters
-    Should get about 64~95% accuracy
-    """
-
-    input = keras.layers.Input(shape=input_shape)
-
-    x = keras.layers.Convolution2D(nb_filter=10, nb_row=4, nb_col=4, subsample=(3, 3), activation='relu')(input)
-    x = keras.layers.Convolution2D(nb_filter=10, nb_row=3, nb_col=3, subsample=(3, 3), activation='relu')(x)
-    x = keras.layers.Convolution2D(nb_filter=10, nb_row=3, nb_col=3, activation='relu')(x)
-
-    x = keras.layers.Flatten()(x)
-    x = keras.layers.Activation('softmax')(x)
-
-    return keras.models.Model(input, x)
+import sklearn.utils
 
 
 def main():
@@ -75,15 +26,41 @@ def main():
 
     input_shape = [28, 28, 1]
 
-    model = get_single_layer_model(input_shape)
-    # model = get_two_layers_model(input_shape)
-    # model = get_three_layers_model(input_shape)
+    input = keras.layers.Input(shape=input_shape)
 
-    # print(model.predict(X_test[:20]).shape)
+    x = keras.layers.Convolution2D(nb_filter=20, nb_row=14, nb_col=14, activation='relu')(input)
+    x = keras.layers.Convolution2D(nb_filter=10, nb_row=15, nb_col=15, activation='relu')(x)
+
+    x = keras.layers.Flatten()(x)
+    x = keras.layers.Activation('softmax')(x)
+
+    model = keras.models.Model(input, x)
 
     optimizer = keras.optimizers.SGD(lr=0.01)
     model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
-    model.fit(x=X_train, y=y_train, nb_epoch=20, batch_size=32, validation_data=(X_test, y_test))
+
+    print("Accuracy: {}".format(model.test_on_batch(X_test[:100], y_test[:100])[1]))
+
+    batch_size = 32
+    epochs = 20
+
+    for epoch in range(epochs):
+
+        print("Epoch {}".format(epoch))
+
+        X_train, y_train = sklearn.utils.shuffle(X_train, y_train)
+
+        # batches_count = len(X_train) // batch_size
+        batches_count = 100
+
+        for batch_index in tqdm.tqdm(range(batches_count)):
+
+            x_batch = X_train[batch_index * batch_size: (batch_index + 1) * batch_size]
+            y_batch = y_train[batch_index * batch_size: (batch_index + 1) * batch_size]
+
+            model.train_on_batch(x_batch, y_batch)
+
+        print("Accuracy: {}".format(model.test_on_batch(X_test[:100], y_test[:100])[1]))
 
 
 if __name__ == "__main__":
