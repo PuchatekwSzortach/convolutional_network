@@ -654,11 +654,6 @@ class TestConvolution2D:
             [0, -1, -2]
         ]).reshape(1, 3, 3, 1)
 
-        print()
-        print("Expected vs actual image gradients")
-        print(expected_image_gradients.reshape(3, 3))
-        print(actual_image_gradients.reshape(3, 3))
-
         assert np.all(expected_image_gradients == actual_image_gradients)
 
     def test_train_backward_2x2x2_image_3_filters(self):
@@ -841,7 +836,7 @@ class TestConvolution2D:
 
         second_kernel = np.dstack([second_kernel_first_channel, second_kernel_second_channel])
 
-        kernels = np.array([first_kernel, second_kernel])
+        kernels = np.array([first_kernel, second_kernel], dtype=np.float32)
 
         # Overwrite kernels with known values
         convolution.kernels = kernels
@@ -1036,7 +1031,7 @@ class TestConvolution2D:
             [1, 0]
         ])
 
-        kernel = np.dstack([kernel_first_channel, kernel_second_channel]).reshape(1, 2, 2, 2)
+        kernel = np.dstack([kernel_first_channel, kernel_second_channel]).reshape(1, 2, 2, 2).astype(np.float32)
 
         # Overwrite kernels with known values
         convolution.kernels = kernel
@@ -1152,7 +1147,7 @@ class TestConvolution2D:
             [-3, 0]
         ])
 
-        kernel = np.dstack([kernel_first_channel, kernel_second_channel]).reshape(1, 2, 2, 2)
+        kernel = np.dstack([kernel_first_channel, kernel_second_channel]).reshape(1, 2, 2, 2).astype(np.float32)
 
         # Overwrite kernels with known values
         convolution.kernels = kernel
@@ -1304,7 +1299,7 @@ class TestConvolution2D:
 
         second_kernel = np.dstack([second_kernel_first_channel, second_kernel_second_channel])
 
-        kernels = np.array([first_kernel, second_kernel])
+        kernels = np.array([first_kernel, second_kernel], dtype=np.float32)
 
         # Overwrite kernels with known values
         convolution.kernels = kernels

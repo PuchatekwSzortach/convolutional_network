@@ -60,7 +60,7 @@ def main():
 
             model.train_on_batch(x_batch, y_batch)
 
-        print("Accuracy: {}".format(model.test_on_batch(X_test[:100], y_test[:100])[1]))
+        print("Accuracy: {}".format(model.test_on_batch(X_test[:1000], y_test[:1000])[1]))
 
 
 if __name__ == "__main__":

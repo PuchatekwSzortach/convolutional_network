@@ -90,39 +90,11 @@ contributed to every pixel in downstream layer
 - test model.train()
 - add model.fit()
 
-Performance at 100 batches:
-Single layer: 0.54 after first epoch, 0.73 after third epoch
-
-Ok, now try to work on speeding our convolutional network up a bit.
-
-Current implementation: 6 seconds
-
-Main bottlenecks:
-- _get_image_gradients
-- _update_kernel_weights
-
-Added a change to compute image gradients over all input channels at once for a 25% speedup - now 4~4.5 sec
-
-Now _update_kernel_weights is the main bottleneck
-
-Changed _update_kernel_weights to compute kernel weight updates using error derivatives for all images in a vectorized fashion,
-cutting down computational time by another 25% - now performance script takes 3 seconds and 12 mins for multi mnist
-
-Now bottlenecks are:
-- _get_image_gradients
-- _update_kernel_weights
-
-Changed _get_image_gradients to make computations across a whole row for a single image pixel gradient update in a vectorized form
- for a ~25% speedup. 2.2 sec on performance script and 8 min on mnist_multilayer
-
-Change to work on whole kernel at once:
-performance script: no effect, multilayer either
-
-Changed row wise kernel addressing to use slices not list of indices for another 25% speedup.
-Performance script not takes 1.8sec and mnist_multilayer 6 mins
-
 Change kernel addressing for image gradient computations so that entire subkernel and corresponding error patch
 are addressed with slicing for another 25% speed increase. PErformance script now takes 1.5 sec to compute and multilayer
 script 4.5 min
 
 Bumped up computations size of performance script so it now takes 4.5sec
+
+Reworked _update_kernel_weights() so that updates for all channels along a single y, x position of a kernel are done
+in parallel. Brought some 15% speed increase, performance script now takes 2.7 sec, multilayer 4 mins
