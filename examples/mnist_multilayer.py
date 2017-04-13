@@ -58,7 +58,7 @@ def main():
 
             model.train(x_batch, y_batch, learning_rate=0.01)
 
-        print("Accuracy: {}".format(model.get_accuracy(X_test, y_test)))
+        print("Accuracy: {}".format(model.get_accuracy(X_test[:100], y_test[:100])))
 
 
 if __name__ == "__main__":
