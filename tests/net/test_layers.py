@@ -654,6 +654,11 @@ class TestConvolution2D:
             [0, -1, -2]
         ]).reshape(1, 3, 3, 1)
 
+        print()
+        print("Expected vs actual image gradients")
+        print(expected_image_gradients.reshape(3, 3))
+        print(actual_image_gradients.reshape(3, 3))
+
         assert np.all(expected_image_gradients == actual_image_gradients)
 
     def test_train_backward_2x2x2_image_3_filters(self):

@@ -115,3 +115,8 @@ Now bottlenecks are:
 Changed _get_image_gradients to make computations across a whole row for a single image pixel gradient update in a vectorized form
  for a ~25% speedup. 2.2 sec on performance script and 8 min on mnist_multilayer
 
+Change to work on whole kernel at once:
+performance script: no effect, multilayer either
+
+Changed row wise kernel addressing to use slices not list of indices for another 25% speedup.
+Performance script not takes 1.8sec and mnist_multilayer 6 mins

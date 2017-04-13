@@ -2,6 +2,8 @@
 Module with layers
 """
 
+import itertools
+
 import numpy as np
 
 
@@ -297,8 +299,13 @@ class Convolution2D(Layer):
                         for kernel_y in range(subkernel_y_start, subkernel_y_end):
 
                             # Select indices of all elements at current row that were affected by examined image pixel
-                            x_indices = list(range(x - subkernel_x_start, x - subkernel_x_end, -1))
-                            error_patch = preactivation_error_gradients[image_index, y - kernel_y, x_indices, :]
+                            # If slice should go all the way to beginning of row, set slice end to None,
+                            # since -1 isn't a legal slice value
+                            x_slice_end = None if x - subkernel_x_end == -1 else x - subkernel_x_end
+                            x_slice = slice(x - subkernel_x_start, x_slice_end, -1)
+
+                            error_patch = preactivation_error_gradients[
+                                          image_index, y - kernel_y, x_slice, :]
 
                             # Select appropriate row of all kernels and roll channel axis to last dimension,
                             # since error_patch has channels along last index,
@@ -306,8 +313,53 @@ class Convolution2D(Layer):
                             kernel_row = np.rollaxis(
                                 kernels[:, kernel_y, subkernel_x_start:subkernel_x_end, input_channel_index], 0, 2)
 
+                            # print("\n\n")
+                            # print("Image shape: {}".format(self.last_input.shape))
+                            # print("Coordinate: {}x{}".format(y, x))
+                            # print("y_index: {}".format(y - kernel_y))
+                            # print("x_indices: {}".format(x_slice)))
+                            # print("kernel y indices: {}".format(list(range(subkernel_y_start, subkernel_y_end))))
+                            # print("kernel x indices: {}".format(list(range(subkernel_x_start, subkernel_x_end))))
+                            # print("Preactivation gradients shape: {}".format(preactivation_error_gradients.shape))
+                            # print("kernels shape: {}".format(kernels.shape))
+                            #
+                            # print("error_patch shape: {}".format(error_patch.shape))
+                            # print("kernel_row shape: {}".format(kernel_row.shape))
+
                             row_contribution = np.sum(error_patch * kernel_row)
                             contribution += row_contribution
+
+                        # Select indices of all elements that were affected by examined image pixel
+                        # y_indices = list(range(y - subkernel_y_start, y - subkernel_y_end, -1))
+                        # x_indices = list(range(x - subkernel_x_start, x - subkernel_x_end, -1))
+                        #
+                        # y_indices, x_indices = zip(*itertools.product(y_indices, x_indices))
+                        #
+                        # error_patch = preactivation_error_gradients[image_index, y_indices, x_indices, :]
+                        #
+                        # kernel_y_indices = range(subkernel_y_start, subkernel_y_end)
+                        # kernel_x_indices = range(subkernel_x_start, subkernel_x_end)
+                        #
+                        # kernel_y_indices, kernel_x_indices = zip(*itertools.product(kernel_y_indices, kernel_x_indices))
+                        #
+                        # subkernel = np.rollaxis(kernels[
+                        #             :, kernel_y_indices, kernel_x_indices,
+                        #             input_channel_index], 0, 2)
+                        #
+                        # contribution = np.sum(error_patch * subkernel)
+
+                        # print("\n\n")
+                        # print("Image shape: {}".format(self.last_input.shape))
+                        # print("Coordinate: {}x{}".format(y, x))
+                        # print("y_indices: {}".format(y_indices))
+                        # print("x_indices: {}".format(x_indices))
+                        # print("kernel y indices: {}".format(list(range(subkernel_y_start, subkernel_y_end))))
+                        # print("kernel x indices: {}".format(list(range(subkernel_x_start, subkernel_x_end))))
+                        # print("Preactivation gradients shape: {}".format(preactivation_error_gradients.shape))
+                        # print("kernels shape: {}".format(kernels.shape))
+                        #
+                        # print("error_patch shape: {}".format(error_patch.shape))
+                        # print("subkernel shape: {}".format(subkernel.shape))
 
                         image_gradients_index = (image_index, y, x, input_channel_index)
                         image_gradients[image_gradients_index] = contribution
