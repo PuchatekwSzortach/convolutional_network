@@ -120,3 +120,7 @@ performance script: no effect, multilayer either
 
 Changed row wise kernel addressing to use slices not list of indices for another 25% speedup.
 Performance script not takes 1.8sec and mnist_multilayer 6 mins
+
+Change kernel addressing for image gradient computations so that entire subkernel and corresponding error patch
+are addressed with slicing for another 25% speed increase. PErformance script now takes 1.5 sec to compute and multilayer
+script 4.5 min
