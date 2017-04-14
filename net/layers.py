@@ -156,31 +156,41 @@ class Convolution2D(Layer):
 
         self.biases = np.zeros((self.nb_filter,), dtype=np.float32)
 
-    def forward(self, x):
+    def forward(self, input):
 
-        preactivation = self._get_preactivation(x)
+        preactivation = self._get_preactivation(input)
 
         # Apply ReLU activation
         return self._relu(preactivation)
 
-    def _get_preactivation(self, x):
+    def _get_preactivation(self, input):
 
-        preactivation = np.zeros(shape=(x.shape[0],) + self.output_shape[1:])
+        preactivation = np.zeros(shape=(input.shape[0],) + self.output_shape[1:])
+
+        # Kernels with kernels count dimension rolled to last dimension
+        rolled_kernels = np.rollaxis(self.kernels, 0, 4)
 
         # For each image
-        for sample_index, sample in enumerate(x):
+        for sample_index, sample in enumerate(input):
 
-            # For each filter
-            for kernel_index, (kernel, bias) in enumerate(zip(self.kernels, self.biases)):
+            for row_index in range(0, input.shape[1] - self.nb_row + 1):
 
-                for row_index in range(0, x.shape[1] - self.nb_row + 1):
+                for col_index in range(0, input.shape[2] - self.nb_col + 1):
 
-                    for col_index in range(0, x.shape[2] - self.nb_col + 1):
+                    # Select patch over which kernels will be applied
+                    input_patch = sample[row_index: row_index + self.nb_row, col_index: col_index + self.nb_col, :]
 
-                        input_patch = sample[row_index: row_index + self.nb_row, col_index: col_index + self.nb_col, :]
+                    # input patch is 3D, but we will convolve it with a series of 3D kernels, thus a 4D entity.
+                    # Thus reshape input patch to have a 4th dimension. Numpy will then broadcast input patch
+                    # along that dimension to match number of kernels
+                    reshaped_input_patch = input_patch.reshape(input_patch.shape + (1,))
 
-                        preactivation[sample_index, row_index, col_index, kernel_index] = \
-                            np.sum(input_patch * kernel) + bias
+                    # Preactivation pixel value will a 1D array that holds results of convolutions over
+                    # a selected patch with all kernels, one value for each kernel
+                    preactivation_pixel_values = \
+                        np.sum(reshaped_input_patch * rolled_kernels, axis=(0, 1, 2)) + self.biases
+
+                    preactivation[sample_index, row_index, col_index, :] = preactivation_pixel_values
 
         return preactivation
 
@@ -192,11 +202,11 @@ class Convolution2D(Layer):
 
         return 1 * (x > 0)
 
-    def train_forward(self, x):
+    def train_forward(self, input):
 
-        self.last_input = x
+        self.last_input = input
 
-        self.last_preactivation = self._get_preactivation(x)
+        self.last_preactivation = self._get_preactivation(input)
         self.last_output = self._relu(self.last_preactivation)
 
         return self.last_output

@@ -105,3 +105,11 @@ _update_kernel_weights() - 9.5%
 
 Updated _get_image_gradients() to compute image gradients across all channels at once. Brought some 30% speed increase,
 performance script now takes 1.8sec and multilayer 2 mins 15 sec
+
+Bottlenecks now are:
+_get_preactivation() - 13.32%
+_update_kernel_weights() - 10.78%
+_get_image_gradients() - 9.92%
+
+Reworked _get_preactivation to compute convolution at a single patch over all kernels at once.
+This brought some 40% speedup. Performance script now takes 1.2 sec, multilayer takes about 1min 20 sec
