@@ -98,3 +98,10 @@ Bumped up computations size of performance script so it now takes 4.5sec
 
 Reworked _update_kernel_weights() so that updates for all channels along a single y, x position of a kernel are done
 in parallel. Brought some 15% speed increase, performance script now takes 2.7 sec, multilayer 4 mins
+
+Bottlenecks now are:
+_get_image_gradients() - 23.4%
+_update_kernel_weights() - 9.5%
+
+Updated _get_image_gradients() to compute image gradients across all channels at once. Brought some 30% speed increase,
+performance script now takes 1.8sec and multilayer 2 mins 15 sec
