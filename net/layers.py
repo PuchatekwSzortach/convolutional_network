@@ -167,30 +167,33 @@ class Convolution2D(Layer):
 
         preactivation = np.zeros(shape=(input.shape[0],) + self.output_shape[1:])
 
-        # Kernels with kernels count dimension rolled to last dimension
+        # Kernels have kernels count in first dimension. Roll kernels count to last dimension
+        # rolled_kernels dimensions are y, x, input_channels, output_channels
         rolled_kernels = np.rollaxis(self.kernels, 0, 4)
 
-        # For each image
-        for sample_index, sample in enumerate(input):
+        # Now repeat kernels for each image
+        rolled_kernels = np.array([rolled_kernels] * input.shape[0])
 
-            for row_index in range(0, input.shape[1] - self.nb_row + 1):
+        for row_index in range(0, input.shape[1] - self.nb_row + 1):
 
-                for col_index in range(0, input.shape[2] - self.nb_col + 1):
+            for col_index in range(0, input.shape[2] - self.nb_col + 1):
 
-                    # Select patch over which kernels will be applied
-                    input_patch = sample[row_index: row_index + self.nb_row, col_index: col_index + self.nb_col, :]
+                # Select patch over which kernels will be applied
+                # input patch has dimensions images, y, x, input_channels
+                input_patch = input[:, row_index: row_index + self.nb_row, col_index: col_index + self.nb_col, :]
 
-                    # input patch is 3D, but we will convolve it with a series of 3D kernels, thus a 4D entity.
-                    # Thus reshape input patch to have a 4th dimension. Numpy will then broadcast input patch
-                    # along that dimension to match number of kernels
-                    reshaped_input_patch = input_patch.reshape(input_patch.shape + (1,))
+                # Add output channels dimension to input patch
+                # input patch dimensions are images, y, x, input channels, output channels
+                input_patch = input_patch.reshape(input_patch.shape + (1, ))
 
-                    # Preactivation pixel value will a 1D array that holds results of convolutions over
-                    # a selected patch with all kernels, one value for each kernel
-                    preactivation_pixel_values = \
-                        np.sum(reshaped_input_patch * rolled_kernels, axis=(0, 1, 2)) + self.biases
+                # Preactivation pixel value will be a 2D array of convolution results of image patches with kernels
+                # First dimension is images dimension, second dimension is kernels/outputs channels
+                # In short with a given y, x position and kernel patch we compute for all images, inputs channels
+                # and kernels at once
+                preactivation_pixel_values = \
+                    np.sum(input_patch * rolled_kernels, axis=(1, 2, 3)) + self.biases
 
-                    preactivation[sample_index, row_index, col_index, :] = preactivation_pixel_values
+                preactivation[:, row_index, col_index, :] = preactivation_pixel_values
 
         return preactivation
 
