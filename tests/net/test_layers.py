@@ -299,12 +299,12 @@ class TestConvolution2D:
 
             convolution.build(input_shape=(None, 10, 10))
 
-    def test_forward_simple_one_input_channel_and_one_output_channel(self):
+    def test_forward_one_image_4x4x1_one_2x2x1_kernel(self):
 
         convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
         convolution.build(input_shape=(None, 4, 4, 1))
 
-        x = np.array(
+        images = np.array(
             [
                 [1, 1, 0, 0],
                 [0, 0, 1, 1],
@@ -330,17 +330,17 @@ class TestConvolution2D:
             [6, 5, 6]
         ]).reshape(1, 3, 3, 1)
 
-        actual = convolution.forward(x)
+        actual = convolution.forward(images)
 
         assert expected.shape == actual.shape
         assert np.all(expected == actual)
 
-    def test_forward_simple_one_input_channel_and_two_output_channels(self):
+    def test_forward_single_4x4x1_image_two_2_2_1_kernels(self):
 
         convolution = net.layers.Convolution2D(nb_filter=2, nb_row=2, nb_col=2)
         convolution.build(input_shape=(None, 4, 4, 1))
 
-        x = np.array(
+        images = np.array(
             [
                 [1, 1, 0, 0],
                 [0, 0, 1, 1],
@@ -379,17 +379,17 @@ class TestConvolution2D:
 
         expected = np.dstack([expected_first_channel, expected_second_channel]).reshape((1, 3, 3, 2))
 
-        actual = convolution.forward(x)
+        actual = convolution.forward(images)
 
         assert expected.shape == actual.shape
         assert np.all(expected == actual)
 
-    def test_train_forward_simple_one_input_channel_and_one_output_channel(self):
+    def test_train_forward_one_4x4x1_image_one_2x2x1_kernel(self):
 
         convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
         convolution.build(input_shape=(None, 4, 4, 1))
 
-        x = np.array(
+        images = np.array(
             [
                 [1, 1, 0, 0],
                 [0, 0, 1, 1],
@@ -415,9 +415,9 @@ class TestConvolution2D:
             [6, 5, 6]
         ]).reshape(1, 3, 3, 1)
 
-        actual = convolution.train_forward(x)
+        actual = convolution.train_forward(images)
 
-        assert np.all(x == convolution.last_input)
+        assert np.all(images == convolution.last_input)
         assert np.all(expected == actual)
         assert np.all(expected == convolution.last_output)
 

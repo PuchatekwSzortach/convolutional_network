@@ -1,1 +1,4 @@
 performance script: 1.7 sec. Multilayer: 34sec
+
+With a matrix approach to compute forward convolutions:
+performance script: 2.8 sec. Multilayer: 54sec

@@ -93,3 +93,31 @@ def test_get_image_patches_matrix_2_4_1_image():
     actual = net.conversions.get_image_patches_matrix(image, kernel_shape)
 
     assert np.all(expected == actual)
+
+
+def test_get_image_patches_matrix_4x4x1_image():
+
+    image = np.array([
+        [1, 1, 0, 0],
+        [0, 0, 1, 1],
+        [1, 0, 0, 1],
+        [0, 1, 1, 0]
+    ])
+
+    kernel_shape = (2, 2, 1)
+
+    expected = np.array([
+        [1, 1, 0, 0],
+        [1, 0, 0, 1],
+        [0, 0, 1, 1],
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 1, 0, 1],
+        [1, 0, 0, 1],
+        [0, 0, 1, 1],
+        [0, 1, 1, 0]
+    ])
+
+    actual = net.conversions.get_image_patches_matrix(image, kernel_shape)
+
+    assert np.all(expected == actual)
