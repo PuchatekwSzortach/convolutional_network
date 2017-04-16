@@ -237,35 +237,42 @@ class Convolution2D(Layer):
 
     def _update_kernels(self, preactivation_error_gradients, learning_rate):
 
-        for kernel_index in range(len(self.kernels)):
+        kernels_number = self.kernels.shape[0]
 
-            for y in range(self.nb_row):
+        for y in range(self.nb_row):
 
-                input_row_start = y
-                input_row_end = self.input_shape[1] - self.nb_row + y + 1
+            input_row_start = y
+            input_row_end = self.input_shape[1] - self.nb_row + y + 1
 
-                for x in range(self.nb_col):
+            for x in range(self.nb_col):
 
-                    input_column_start = x
-                    input_column_end = self.input_shape[2] - self.nb_col + x + 1
+                input_column_start = x
+                input_column_end = self.input_shape[2] - self.nb_col + x + 1
 
-                    # Input patches have dimensions images, y, x, input channels
-                    inputs_patches = self.last_input[
-                                     :, input_row_start:input_row_end, input_column_start:input_column_end, :]
+                # Input patches have dimensions images, y, x, input channels
+                inputs_patches = self.last_input[
+                                 :, input_row_start:input_row_end, input_column_start:input_column_end, :]
 
-                    # error gradients have dimensions images, y, x, output_channels
-                    error_gradients = preactivation_error_gradients[:, :, :, kernel_index]
+                # Add output channels dimension to input_patches.
+                # input patches now has dimensions image, y, x, input_channels, output_channels
+                inputs_patches = np.tile(inputs_patches.reshape(inputs_patches.shape + (1, )), kernels_number)
 
-                    # Reshape error_gradients so they have input channel dimension
-                    # Numpy broadcasting will then take care of matching it with number of channels of inputs patches
-                    reshaped_kernel_preactivation_error_gradients = error_gradients.reshape(error_gradients.shape + (1,))
+                # Roll input channels dimension to end
+                # input patches now has dimensions image, y, x, output_channels, input_channels
+                inputs_patches = np.rollaxis(inputs_patches, 3, 5)
 
-                    total_kernel_weight_gradient = np.sum(
-                        reshaped_kernel_preactivation_error_gradients * inputs_patches, axis=(0, 1, 2))
+                # preactivation_error_gradients dimensions are images, y, x, output_channels
+                # Add input channels dimension to preactivation_error_gradients.
+                # Numpy broadcasting will take care of repeating inputs channels dimension so as to match input_patches
+                preactivation_error_gradients_with_input_chanels_dimensions = \
+                    preactivation_error_gradients.reshape(preactivation_error_gradients.shape + (1,))
 
-                    weight_index = (kernel_index, y, x)
+                total_kernel_weight_gradient = np.sum(
+                    preactivation_error_gradients_with_input_chanels_dimensions * inputs_patches, axis=(0, 1, 2))
 
-                    self.kernels[weight_index] -= learning_rate * total_kernel_weight_gradient / len(inputs_patches)
+                weight_index = (slice(None), y, x)
+
+                self.kernels[weight_index] -= learning_rate * total_kernel_weight_gradient / len(inputs_patches)
 
     def _get_image_gradients(self, preactivation_error_gradients, kernels):
 
