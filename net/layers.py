@@ -166,58 +166,29 @@ class Convolution2D(Layer):
 
     def _get_preactivation(self, input):
 
-        # preactivation = np.zeros(shape=(input.shape[0],) + self.output_shape[1:])
-        #
-        # # Kernels have kernels count in first dimension. Roll kernels count to last dimension
-        # # rolled_kernels dimensions are y, x, input_channels, output_channels
-        # rolled_kernels = np.rollaxis(self.kernels, 0, 4)
-        #
-        # # Now repeat kernels for each image
-        # rolled_kernels = np.array([rolled_kernels] * input.shape[0])
-        #
-        # for row_index in range(0, input.shape[1] - self.nb_row + 1):
-        #
-        #     for col_index in range(0, input.shape[2] - self.nb_col + 1):
-        #
-        #         # Select patch over which kernels will be applied
-        #         # input patch has dimensions images, y, x, input_channels
-        #         input_patch = input[:, row_index: row_index + self.nb_row, col_index: col_index + self.nb_col, :]
-        #
-        #         # Add output channels dimension to input patch
-        #         # input patch dimensions are images, y, x, input channels, output channels
-        #         input_patch = input_patch.reshape(input_patch.shape + (1, ))
-        #
-        #         # Preactivation pixel value will be a 2D array of convolution results of image patches with kernels
-        #         # First dimension is images dimension, second dimension is kernels/outputs channels
-        #         # In short with a given y, x position and kernel patch we compute for all images, inputs channels
-        #         # and kernels at once
-        #         preactivation_pixel_values = \
-        #             np.sum(input_patch * rolled_kernels, axis=(1, 2, 3)) + self.biases
-        #
-        #         preactivation[:, row_index, col_index, :] = preactivation_pixel_values
-
         preactivation = np.zeros(shape=(input.shape[0],) + self.output_shape[1:])
+
+        # Reshape kernels into a matrix so that each column stands for a single flattened kernel
+        kernels_matrix = self.kernels.reshape(self.kernels.shape[0], -1).T
 
         for image_index in range(input.shape[0]):
 
-            for kernel_index in range(self.kernels.shape[0]):
+            # Get image matrix representation such that each image patch that gets convolved is represented
+            # by a single matrix row
+            image_matrix = net.conversions.get_image_patches_matrix(input[image_index], self.kernels.shape[1:])
 
-                # Get image matrix representation such that each image patch that gets convolved is represented
-                # by a matrix row
-                image_matrix = net.conversions.get_image_patches_matrix(input[image_index], self.kernels.shape[1:])
+            # Compute responses of all patches with kernel
+            # Response is a 2D matrix with dimensions: patches, kernels
+            # E.g each row represents results of convolving a single patch with all kernels
+            response = np.dot(image_matrix, kernels_matrix)
 
-                # Convert kernel to a vector
-                kernel_vector = self.kernels[kernel_index].flatten().reshape(-1, 1)
+            # Reshape response to 3D image y, x, output channels
+            response_shape = (input.shape[1] - self.kernels.shape[1] + 1, input.shape[2] - self.kernels.shape[2] + 1,
+                              self.kernels.shape[0])
 
-                # Compute responses of all patches with kernel
-                # Response is a 1D vector
-                response = np.dot(image_matrix, kernel_vector) + self.biases[kernel_index]
+            response = response.reshape(response_shape)
 
-                # Reshape response to 2D image
-                response_shape = (input.shape[1] - self.kernels.shape[1] + 1, input.shape[2] - self.kernels.shape[2] + 1)
-                response = response.reshape(response_shape)
-
-                preactivation[image_index, :, :, kernel_index] = response
+            preactivation[image_index] = response + self.biases
 
         return preactivation
 

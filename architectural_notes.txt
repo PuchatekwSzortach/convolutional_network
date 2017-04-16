@@ -2,3 +2,7 @@ performance script: 1.7 sec. Multilayer: 34sec
 
 With a matrix approach to compute forward convolutions:
 performance script: 2.8 sec. Multilayer: 54sec
+
+Reworked matrix approach so that computations for all kernels are done with a single matrix multiplication.
+Images are still processed in a loop
+performance script: 2 sec. Multilayer: 29sec
