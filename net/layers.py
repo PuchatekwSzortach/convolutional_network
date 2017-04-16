@@ -239,10 +239,6 @@ class Convolution2D(Layer):
 
         for kernel_index in range(len(self.kernels)):
 
-            # Select gradients that were affected by current kernel
-            # Dimensions are [image, rows, cols]
-            kernel_preactivation_error_gradients = preactivation_error_gradients[:, :, :, kernel_index]
-
             for y in range(self.nb_row):
 
                 input_row_start = y
@@ -253,13 +249,16 @@ class Convolution2D(Layer):
                     input_column_start = x
                     input_column_end = self.input_shape[2] - self.nb_col + x + 1
 
+                    # Input patches have dimensions images, y, x, input channels
                     inputs_patches = self.last_input[
                                      :, input_row_start:input_row_end, input_column_start:input_column_end, :]
 
-                    # Reshape kernel preactivation error gradients so they have a channel dimension
+                    # error gradients have dimensions images, y, x, output_channels
+                    error_gradients = preactivation_error_gradients[:, :, :, kernel_index]
+
+                    # Reshape error_gradients so they have input channel dimension
                     # Numpy broadcasting will then take care of matching it with number of channels of inputs patches
-                    reshaped_kernel_preactivation_error_gradients = kernel_preactivation_error_gradients.reshape(
-                        kernel_preactivation_error_gradients.shape + (1,))
+                    reshaped_kernel_preactivation_error_gradients = error_gradients.reshape(error_gradients.shape + (1,))
 
                     total_kernel_weight_gradient = np.sum(
                         reshaped_kernel_preactivation_error_gradients * inputs_patches, axis=(0, 1, 2))
