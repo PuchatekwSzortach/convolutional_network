@@ -219,17 +219,21 @@ class Convolution2D(Layer):
         old_kernels = self.kernels.copy()
 
         self._update_kernels(preactivation_error_gradients, learning_rate)
+        self._update_biases(preactivation_error_gradients, learning_rate)
+
         return self._get_image_gradients(preactivation_error_gradients, old_kernels)
 
-    def _update_bias(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
+    def _update_biases(self, preactivation_error_gradients, learning_rate):
 
-        # Sum contributions for each image
-        bias_error_gradients_sums = np.sum(kernel_preactivation_error_gradients, axis=(1, 2))
+        for kernel_index in range(len(self.kernels)):
 
-        # And take mean across contributions to different images
-        mean_bias_error_gradient = np.mean(bias_error_gradients_sums)
+            # Sum contributions for each image
+            bias_error_gradients_sums = np.sum(preactivation_error_gradients[:, :, :, kernel_index], axis=(1, 2))
 
-        self.biases[kernel_index] -= learning_rate * mean_bias_error_gradient
+            # And take mean across contributions to different images
+            mean_bias_error_gradient = np.mean(bias_error_gradients_sums)
+
+            self.biases[kernel_index] -= learning_rate * mean_bias_error_gradient
 
     def _update_kernels(self, preactivation_error_gradients, learning_rate):
 
@@ -239,35 +243,30 @@ class Convolution2D(Layer):
             # Dimensions are [image, rows, cols]
             kernel_preactivation_error_gradients = preactivation_error_gradients[:, :, :, kernel_index]
 
-            self._update_bias(kernel_preactivation_error_gradients, kernel_index, learning_rate)
-            self._update_kernel_weights(kernel_preactivation_error_gradients, kernel_index, learning_rate)
+            for y in range(self.nb_row):
 
-    def _update_kernel_weights(self, kernel_preactivation_error_gradients, kernel_index, learning_rate):
+                input_row_start = y
+                input_row_end = self.input_shape[1] - self.nb_row + y + 1
 
-        for y in range(self.nb_row):
+                for x in range(self.nb_col):
 
-            input_row_start = y
-            input_row_end = self.input_shape[1] - self.nb_row + y + 1
+                    input_column_start = x
+                    input_column_end = self.input_shape[2] - self.nb_col + x + 1
 
-            for x in range(self.nb_col):
+                    inputs_patches = self.last_input[
+                                     :, input_row_start:input_row_end, input_column_start:input_column_end, :]
 
-                input_column_start = x
-                input_column_end = self.input_shape[2] - self.nb_col + x + 1
+                    # Reshape kernel preactivation error gradients so they have a channel dimension
+                    # Numpy broadcasting will then take care of matching it with number of channels of inputs patches
+                    reshaped_kernel_preactivation_error_gradients = kernel_preactivation_error_gradients.reshape(
+                        kernel_preactivation_error_gradients.shape + (1,))
 
-                inputs_patches = self.last_input[
-                                 :, input_row_start:input_row_end, input_column_start:input_column_end, :]
+                    total_kernel_weight_gradient = np.sum(
+                        reshaped_kernel_preactivation_error_gradients * inputs_patches, axis=(0, 1, 2))
 
-                # Reshape kernel preactivation error gradients so they have a channel dimension
-                # Numpy broadcasting will then take care of matching it with number of channels of inputs patches
-                reshaped_kernel_preactivation_error_gradients = kernel_preactivation_error_gradients.reshape(
-                    kernel_preactivation_error_gradients.shape + (1,))
+                    weight_index = (kernel_index, y, x)
 
-                total_kernel_weight_gradient = np.sum(
-                    reshaped_kernel_preactivation_error_gradients * inputs_patches, axis=(0, 1, 2))
-
-                weight_index = (kernel_index, y, x)
-
-                self.kernels[weight_index] -= learning_rate * total_kernel_weight_gradient / len(inputs_patches)
+                    self.kernels[weight_index] -= learning_rate * total_kernel_weight_gradient / len(inputs_patches)
 
     def _get_image_gradients(self, preactivation_error_gradients, kernels):
 

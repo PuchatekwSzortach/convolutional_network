@@ -122,3 +122,8 @@ Performance: 4.1 sec, multilayer 1min 20sec
 
 Reworked _get_image_gradients() to compute gradients on a given pixel for all images at once for about 50% speedup.
 Performance script now takes 2.6 sec and multilayer 40 sec
+
+
+Bottlenecks now are:
+- _update_kernels() - 24.34%
+_get_image_gradients() - 9.98%
