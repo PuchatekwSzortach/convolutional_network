@@ -6,3 +6,8 @@ performance script: 2.8 sec. Multilayer: 54sec
 Reworked matrix approach so that computations for all kernels are done with a single matrix multiplication.
 Images are still processed in a loop
 performance script: 2 sec. Multilayer: 29sec
+
+get_preactivations() takes: 0.192sec (1.45%) -> to 0.08sec and 75% of that in creating matrices - which we can still optimize ^^
+
+With all images at once:
+performance script: 1.56 sec. Multilayer: 29sec - so multilayer without change

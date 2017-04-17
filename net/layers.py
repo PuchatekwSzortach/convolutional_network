@@ -166,29 +166,25 @@ class Convolution2D(Layer):
 
     def _get_preactivation(self, input):
 
-        preactivation = np.zeros(shape=(input.shape[0],) + self.output_shape[1:])
-
         # Reshape kernels into a matrix so that each column stands for a single flattened kernel
         kernels_matrix = self.kernels.reshape(self.kernels.shape[0], -1).T
 
-        for image_index in range(input.shape[0]):
+        # Get image batches matrix representation such that each image patch that gets convolved is represented
+        # by a single matrix row. After one image ends, second starts and so on
+        image_batches_matrix = net.conversions.get_images_batch_patches_matrix(input, self.kernels.shape[1:])
 
-            # Get image matrix representation such that each image patch that gets convolved is represented
-            # by a single matrix row
-            image_matrix = net.conversions.get_image_patches_matrix(input[image_index], self.kernels.shape[1:])
+        # Compute responses of all patches with kernel
+        # Response is a 2D matrix with dimensions: patches, kernels
+        # E.g each row represents results of convolving a single patch with all kernels
+        response = np.dot(image_batches_matrix, kernels_matrix)
 
-            # Compute responses of all patches with kernel
-            # Response is a 2D matrix with dimensions: patches, kernels
-            # E.g each row represents results of convolving a single patch with all kernels
-            response = np.dot(image_matrix, kernels_matrix)
+        # Reshape response to 4D images batch with dimensions image y, x, output channels
+        response_shape = (input.shape[0], input.shape[1] - self.kernels.shape[1] + 1,
+                          input.shape[2] - self.kernels.shape[2] + 1, self.kernels.shape[0])
 
-            # Reshape response to 3D image y, x, output channels
-            response_shape = (input.shape[1] - self.kernels.shape[1] + 1, input.shape[2] - self.kernels.shape[2] + 1,
-                              self.kernels.shape[0])
+        response = response.reshape(response_shape)
 
-            response = response.reshape(response_shape)
-
-            preactivation[image_index] = response + self.biases
+        preactivation = response + self.biases
 
         return preactivation
 
