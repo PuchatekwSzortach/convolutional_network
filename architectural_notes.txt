@@ -11,3 +11,6 @@ get_preactivations() takes: 0.192sec (1.45%) -> to 0.08sec and 75% of that in cr
 
 With all images at once:
 performance script: 1.56 sec. Multilayer: 29sec - so multilayer without change
+
+Reworked kernels update to use matrix multiplication
+performance script: 0.925sec, multilayer: 15 sec

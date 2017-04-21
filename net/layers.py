@@ -231,61 +231,26 @@ class Convolution2D(Layer):
 
     def _update_kernels(self, preactivation_error_gradients, learning_rate):
 
-        # kernels_number = self.kernels.shape[0]
-        #
-        # for y in range(self.nb_row):
-        #
-        #     input_row_start = y
-        #     input_row_end = self.input_shape[1] - self.nb_row + y + 1
-        #
-        #     for x in range(self.nb_col):
-        #
-        #         input_column_start = x
-        #         input_column_end = self.input_shape[2] - self.nb_col + x + 1
-        #
-        #         # Input patches have dimensions images, y, x, input channels
-        #         inputs_patches = self.last_input[
-        #                          :, input_row_start:input_row_end, input_column_start:input_column_end, :]
-        #
-        #         # Add output channels dimension to input_patches.
-        #         # input patches now has dimensions image, y, x, input_channels, output_channels
-        #         inputs_patches = np.tile(inputs_patches.reshape(inputs_patches.shape + (1, )), kernels_number)
-        #
-        #         # Roll input channels dimension to end
-        #         # input patches now has dimensions image, y, x, output_channels, input_channels
-        #         inputs_patches = np.rollaxis(inputs_patches, 3, 5)
-        #
-        #         # preactivation_error_gradients dimensions are images, y, x, output_channels
-        #         # Add input channels dimension to preactivation_error_gradients.
-        #         # Numpy broadcasting will take care of repeating inputs channels dimension so as to match input_patches
-        #         preactivation_error_gradients_with_input_chanels_dimensions = \
-        #             preactivation_error_gradients.reshape(preactivation_error_gradients.shape + (1,))
-        #
-        #         total_kernel_weight_gradient = np.sum(
-        #             preactivation_error_gradients_with_input_chanels_dimensions * inputs_patches, axis=(0, 1, 2))
-        #
-        #         weight_index = (slice(None), y, x)
-        #
-        #         self.kernels[weight_index] -= learning_rate * total_kernel_weight_gradient / len(inputs_patches)
-
+        kernels_count = self.kernels.shape[0]
         kernel_shape = self.kernels.shape[1:]
 
-        for kernel_index in range(self.kernels.shape[0]):
+        # Get image matrix such that each row represents a patch of pixels in all batches that a single
+        # kernel element was convolved with
+        image_matrix = net.conversions.get_channels_wise_images_batch_patches_matrix(self.last_input, kernel_shape)
 
-            total_kernel_weight_gradient = np.zeros(shape=(np.product(kernel_shape), 1))
+        # Change axes so that errors matrix is in order kernels, images, y, x
+        errors_matrix = np.rollaxis(preactivation_error_gradients, 3, 0)
 
-            for image_index in range(self.last_input.shape[0]):
+        # And now reshape errors matrix so that each column represents all errors for a single kernel across all images
+        errors_matrix = errors_matrix.reshape(kernels_count, -1).T
 
-                image_matrix = net.conversions.get_channels_wise_image_patches_matrix(
-                    self.last_input[image_index], self.kernels.shape[1:])
+        # Compute kernel gradients for all elements of all kernels
+        # kernel_gradients_matrix is arranged so that a single column represents a flattened version of a single kernel
+        kernel_gradients_matrix = np.dot(image_matrix, errors_matrix)
 
-                errors_vector = preactivation_error_gradients[image_index, :, :, kernel_index].flatten()
-                errors_vector = errors_vector.reshape(len(errors_vector), 1)
-
-                total_kernel_weight_gradient += np.dot(image_matrix, errors_vector)
-
-            self.kernels[kernel_index] -= \
-                learning_rate * total_kernel_weight_gradient.reshape(kernel_shape) / self.last_input.shape[0]
+        # Reshape kernel matrix so that single kernel is in last dimension, then reshape whole matrix to
+        # original kernels dimension and perform kernels update
+        self.kernels -= learning_rate * kernel_gradients_matrix.T.reshape(self.kernels.shape) / self.last_input.shape[0]
 
     def _get_image_gradients(self, preactivation_error_gradients, kernels):
 
