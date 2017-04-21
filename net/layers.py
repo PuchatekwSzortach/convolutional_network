@@ -268,6 +268,16 @@ class Convolution2D(Layer):
 
                 self.kernels[weight_index] -= learning_rate * total_kernel_weight_gradient / len(inputs_patches)
 
+        # for kernel_index in range(self.kernels.shape[0]):
+        #
+        #     total_kernel_weight_gradient = np.zeros(shape=self.kernels.shape[1:])
+        #
+        #     for image_index in range(self.last_input.shape[0]):
+        #
+        #         errors_vector = preactivation_error_gradients[image_index].flatten()
+        #
+        #     self.kernels[kernel_index] -= learning_rate * total_kernel_weight_gradient / len(self.last_input.shape[0])
+
     def _get_image_gradients(self, preactivation_error_gradients, kernels):
 
         # Tensor for storing error gradients on input image

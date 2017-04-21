@@ -68,3 +68,39 @@ def get_images_batch_patches_matrix(images, kernel_shape):
                 matrix[matrix_index] = image_patch.flatten()
 
     return matrix
+
+
+def get_channels_wise_image_patches_matrix(image, kernel_shape):
+    """
+    Convert a 3D image into a matrix of patches such that each row is a single patch
+     that can be convolved with a kernel of provided shape. Each patch is over a single channel only
+     and patches order is (rows, columns, channels) with channel index running fastest
+    :param image: 3D numpy array
+    :param kernel_shape: 2D kernel shape,
+    :return: 2D numpy array, rows represent image patches. Image patches are scanned in
+    with a step of 1 with fastest changing index being channels, then columns, then rows.
+    """
+
+    vertical_steps = image.shape[0] - kernel_shape[0] + 1
+    horizontal_steps = image.shape[1] - kernel_shape[1] + 1
+
+    # Row for each kernel element and each kernel element was convolved with vertical_steps * horizontal_steps pixels
+    # from image
+    shape = (np.prod(kernel_shape), vertical_steps * horizontal_steps)
+    matrix = np.zeros(shape)
+
+    for kernel_y in range(kernel_shape[0]):
+
+        for kernel_x in range(kernel_shape[1]):
+
+            for kernel_z in range(kernel_shape[2]):
+
+                y_span = slice(kernel_y, image.shape[0] - kernel_shape[0] + kernel_y + 1)
+                x_span = slice(kernel_x, image.shape[1] - kernel_shape[1] + kernel_x + 1)
+
+                image_patch = image[y_span, x_span, kernel_z].flatten()
+
+                row_index = (kernel_y * kernel_shape[1] * kernel_shape[2]) + (kernel_x * kernel_shape[2]) + kernel_z
+                matrix[row_index] = image_patch
+
+    return matrix

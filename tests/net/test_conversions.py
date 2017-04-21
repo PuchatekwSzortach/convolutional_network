@@ -236,3 +236,125 @@ def test_get_images_batch_patches_matrix_two_2x4x1_images_2x2x1_kernel():
     actual = net.conversions.get_images_batch_patches_matrix(images, kernel_shape)
 
     assert np.all(expected == actual)
+
+
+def test_get_channels_wise_image_patches_matrix_2x2x1_image_2x2x1_kernel():
+
+    image = np.arange(4).reshape(2, 2, 1)
+
+    kernel_shape = (2, 2, 1)
+
+    expected = np.array([
+        [0],
+        [1],
+        [2],
+        [3]
+    ])
+
+    actual = net.conversions.get_channels_wise_image_patches_matrix(image, kernel_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_channels_wise_image_patches_matrix_3x3x1_image_2x2x1_kernel():
+
+    image = np.arange(9).reshape(3, 3, 1)
+
+    kernel_shape = (2, 2, 1)
+
+    expected = np.array([
+        [0, 1, 3, 4],
+        [1, 2, 4, 5],
+        [3, 4, 6, 7],
+        [4, 5, 7, 8]
+    ])
+
+    actual = net.conversions.get_channels_wise_image_patches_matrix(image, kernel_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_channels_wise_image_patches_matrix_2x2x2_image_2x2x2_kernel():
+
+    image = np.arange(8).reshape(2, 2, 2)
+
+    kernel_shape = (2, 2, 2)
+
+    expected = np.array([
+        [0],
+        [1],
+        [2],
+        [3],
+        [4],
+        [5],
+        [6],
+        [7]
+    ])
+
+    actual = net.conversions.get_channels_wise_image_patches_matrix(image, kernel_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_channels_wise_image_patches_matrix_3x3x2_image_2x2x2_kernel():
+
+    image = np.arange(18).reshape(3, 3, 2)
+
+    kernel_shape = (2, 2, 2)
+
+    expected = np.array([
+        [0, 2, 6, 8],
+        [1, 3, 7, 9],
+        [2, 4, 8, 10],
+        [3, 5, 9, 11],
+        [6, 8, 12, 14],
+        [7, 9, 13, 15],
+        [8, 10, 14, 16],
+        [9, 11, 15, 17]
+    ])
+
+    actual = net.conversions.get_channels_wise_image_patches_matrix(image, kernel_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_channels_wise_image_patches_matrix_2x4x2_image_2x2x2_kernel():
+
+    image = np.arange(16).reshape(2, 4, 2)
+    kernel_shape = (2, 2, 2)
+
+    expected = np.array([
+        [0, 2, 4],
+        [1, 3, 5],
+        [2, 4, 6],
+        [3, 5, 7],
+        [8, 10, 12],
+        [9, 11, 13],
+        [10, 12, 14],
+        [11, 13, 15]
+    ])
+
+    actual = net.conversions.get_channels_wise_image_patches_matrix(image, kernel_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_channels_wise_image_patches_matrix_4x2x2_image_2x2x2_kernel():
+
+    image = np.arange(16).reshape(4, 2, 2)
+    kernel_shape = (2, 2, 2)
+
+    expected = np.array([
+        [0, 4, 8],
+        [1, 5, 9],
+        [2, 6, 10],
+        [3, 7, 11],
+        [4, 8, 12],
+        [5, 9, 13],
+        [6, 10, 14],
+        [7, 11, 15]
+    ])
+
+    actual = net.conversions.get_channels_wise_image_patches_matrix(image, kernel_shape)
+
+    assert np.all(expected == actual)
