@@ -478,3 +478,175 @@ def test_get_channels_wise_images_batch_patches_matrix_two_4x2x1_images_2x2x1_ke
     actual = net.conversions.get_channels_wise_images_batch_patches_matrix(images, kernel_shape)
 
     assert np.all(expected == actual)
+
+
+def test_get_kernel_patches_matrix_one_2x2x1_kernel_and_one_2x2x1_image():
+
+    kernel = np.arange(1, 5).reshape(2, 2, 1)
+    image_shape = (2, 2, 1)
+
+    expected = np.array([
+        [1],
+        [2],
+        [3],
+        [4]
+    ])
+
+    actual = net.conversions.get_kernel_patches_matrix(kernel, image_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_kernel_patches_matrix_one_2x2x1_kernel_and_one_3x3x1_image():
+
+    kernel = np.arange(1, 5).reshape(2, 2, 1)
+    image_shape = (3, 3, 1)
+
+    expected = np.array([
+        [1, 0, 0, 0],  # I(0, 0)
+        [2, 1, 0, 0],  # I(0, 1)
+        [0, 2, 0, 0],  # I(0, 2)
+        [3, 0, 1, 0],  # I(1, 0)
+        [4, 3, 2, 1],  # I(1, 1)
+        [0, 4, 0, 2],  # I(1, 2)
+        [0, 0, 3, 0],  # I(2, 0)
+        [0, 0, 4, 3],  # I(2, 1)
+        [0, 0, 0, 4]   # I(2, 2)
+    ])
+
+    actual = net.conversions.get_kernel_patches_matrix(kernel, image_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_kernel_patches_matrix_one_2x2x1_kernel_and_one_2x4x1_image():
+
+    kernel = np.arange(1, 5).reshape(2, 2, 1)
+    image_shape = (2, 4, 1)
+
+    expected = np.array([
+        [1, 0, 0],  # I(0, 0)
+        [2, 1, 0],  # I(0, 1)
+        [0, 2, 1],  # I(0, 2)
+        [0, 0, 2],  # I(0, 3)
+        [3, 0, 0],  # I(1, 0)
+        [4, 3, 0],  # I(1, 1)
+        [0, 4, 3],  # I(1, 2)
+        [0, 0, 4],  # I(1, 3)
+
+    ])
+
+    actual = net.conversions.get_kernel_patches_matrix(kernel, image_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_kernel_patches_matrix_one_2x2x1_kernel_and_one_4x2x1_image():
+
+    kernel = np.arange(1, 5).reshape(2, 2, 1)
+    image_shape = (4, 2, 1)
+
+    expected = np.array([
+        [1, 0, 0],  # I(0, 0)
+        [2, 0, 0],  # I(0, 1)
+        [3, 1, 0],  # I(1, 0)
+        [4, 2, 0],  # I(1, 1)
+        [0, 3, 1],  # I(2, 0)
+        [0, 4, 2],  # I(2, 1)
+        [0, 0, 3],  # I(3, 0)
+        [0, 0, 4],  # I(3, 1)
+
+    ])
+
+    actual = net.conversions.get_kernel_patches_matrix(kernel, image_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_kernel_patches_matrix_one_2x2x2_kernel_and_one_3x3x2_image():
+
+    kernel = np.arange(1, 9).reshape(2, 2, 2)
+    image_shape = (3, 3, 2)
+
+    expected = np.array([
+        [1, 0, 0, 0],  # I(0, 0, 0)
+        [2, 0, 0, 0],  # I(0, 0, 1)
+        [3, 1, 0, 0],  # I(0, 1, 0)
+        [4, 2, 0, 0],  # I(0, 1, 1)
+        [0, 3, 0, 0],  # I(0, 2, 0)
+        [0, 4, 0, 0],  # I(0, 2, 1)
+        [5, 0, 1, 0],  # I(1, 0, 0)
+        [6, 0, 2, 0],  # I(1, 0, 1)
+        [7, 5, 3, 1],  # I(1, 1, 0)
+        [8, 6, 4, 2],  # I(1, 1, 1)
+        [0, 7, 0, 3],  # I(1, 2, 0)
+        [0, 8, 0, 4],  # I(1, 2, 1)
+        [0, 0, 5, 0],  # I(2, 0, 0)
+        [0, 0, 6, 0],  # I(2, 0, 1)
+        [0, 0, 7, 5],  # I(2, 1, 0)
+        [0, 0, 8, 6],  # I(2, 1, 1)
+        [0, 0, 0, 7],  # I(2, 2, 0)
+        [0, 0, 0, 8],  # I(2, 2, 1)
+    ])
+
+    actual = net.conversions.get_kernel_patches_matrix(kernel, image_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_kernel_patches_matrix_one_2x2x2_kernel_and_one_2x4x2_image():
+
+    kernel = np.arange(1, 9).reshape(2, 2, 2)
+    image_shape = (2, 4, 2)
+
+    expected = np.array([
+        [1, 0, 0],  # I(0, 0, 0)
+        [2, 0, 0],  # I(0, 0, 1)
+        [3, 1, 0],  # I(0, 1, 0)
+        [4, 2, 0],  # I(0, 1, 1)
+        [0, 3, 1],  # I(0, 2, 0)
+        [0, 4, 2],  # I(0, 2, 1)
+        [0, 0, 3],  # I(0, 3, 0)
+        [0, 0, 4],  # I(0, 3, 1)
+        [5, 0, 0],  # I(1, 0, 0)
+        [6, 0, 0],  # I(1, 0, 1)
+        [7, 5, 0],  # I(1, 1, 0)
+        [8, 6, 0],  # I(1, 1, 1)
+        [0, 7, 5],  # I(1, 2, 0)
+        [0, 8, 6],  # I(1, 2, 1)
+        [0, 0, 7],  # I(1, 3, 0)
+        [0, 0, 8],  # I(1, 3, 1)
+    ])
+
+    actual = net.conversions.get_kernel_patches_matrix(kernel, image_shape)
+
+    assert np.all(expected == actual)
+
+
+def test_get_kernel_patches_matrix_one_2x2x2_kernel_and_one_4x2x2_image():
+
+    kernel = np.arange(1, 9).reshape(2, 2, 2)
+    image_shape = (4, 2, 2)
+
+    expected = np.array([
+        [1, 0, 0],  # I(0, 0, 0)
+        [2, 0, 0],  # I(0, 0, 1)
+        [3, 0, 0],  # I(0, 1, 0)
+        [4, 0, 0],  # I(0, 1, 1)
+        [5, 1, 0],  # I(1, 0, 0)
+        [6, 2, 0],  # I(1, 0, 1)
+        [7, 3, 0],  # I(1, 1, 0)
+        [8, 4, 0],  # I(1, 1, 1)
+        [0, 5, 1],  # I(2, 0, 0)
+        [0, 6, 2],  # I(2, 0, 1)
+        [0, 7, 3],  # I(2, 1, 0)
+        [0, 8, 4],  # I(2, 1, 1)
+        [0, 0, 5],  # I(3, 0, 0)
+        [0, 0, 6],  # I(3, 0, 1)
+        [0, 0, 7],  # I(3, 1, 0)
+        [0, 0, 8],  # I(3, 1, 1)
+    ])
+
+    actual = net.conversions.get_kernel_patches_matrix(kernel, image_shape)
+
+    assert np.all(expected == actual)

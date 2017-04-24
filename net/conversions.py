@@ -141,3 +141,52 @@ def get_channels_wise_images_batch_patches_matrix(images, kernel_shape):
                 matrix[row_index] = patch_across_images
 
     return matrix
+
+
+def get_kernel_patches_matrix(kernel, image_shape):
+    """
+    Convert 3D kernel tensor into a 2D matrix such that each row of matrix represents
+    kernel elements that a single element of image with image_shape was convolved with
+    :param kernel: 3D numpy array
+    :param image_shape: 3 elements tuple
+    :return: 2D numpy array
+    """
+
+    rows_count = np.product(image_shape)
+
+    errors_patch_y_shape = image_shape[0] - kernel.shape[0] + 1
+    error_patch_x_shape = image_shape[1] - kernel.shape[1] + 1
+    error_patch_shape = (errors_patch_y_shape, error_patch_x_shape)
+
+    columns_count = np.product(error_patch_shape)
+
+    matrix = np.zeros(shape=(rows_count, columns_count))
+
+    for y in range(image_shape[0]):
+
+        kernel_y_start = min(y, kernel.shape[0] - 1)
+        kernel_y_end = max(-1, y - errors_patch_y_shape)
+        kernel_y_range = range(kernel_y_start, kernel_y_end, -1)
+
+        for x in range(image_shape[1]):
+
+            kernel_x_start = min(x, kernel.shape[1] - 1)
+            kernel_x_end = max(-1, x - error_patch_x_shape)
+            kernel_x_range = range(kernel_x_start, kernel_x_end, -1)
+
+            for z in range(image_shape[2]):
+
+                row_index = (y * image_shape[1] * image_shape[2]) + (x * image_shape[2]) + z
+
+                kernel_patch = np.zeros(error_patch_shape)
+
+                for kernel_y in kernel_y_range:
+
+                    for kernel_x in kernel_x_range:
+
+                        # Get kernel element
+                        kernel_patch[y - kernel_y, x - kernel_x] = kernel[kernel_y, kernel_x, z]
+
+                matrix[row_index] = kernel_patch.flatten()
+
+    return matrix

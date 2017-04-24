@@ -14,3 +14,5 @@ performance script: 1.56 sec. Multilayer: 29sec - so multilayer without change
 
 Reworked kernels update to use matrix multiplication
 performance script: 0.925sec, multilayer: 15 sec
+
+Bumped up performance script to take 4.5 sec
