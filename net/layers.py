@@ -254,73 +254,95 @@ class Convolution2D(Layer):
 
     def _get_image_gradients(self, preactivation_error_gradients, kernels):
 
+        # # Tensor for storing error gradients on input image
+        # image_gradients = np.zeros_like(self.last_input, dtype=np.float32)
+        #
+        # images_count = self.last_input.shape[0]
+        # rows_count = self.last_input.shape[1]
+        # columns_count = self.last_input.shape[2]
+        #
+        # # For each column
+        # for y in range(rows_count):
+        #
+        #     # For each row
+        #     for x in range(columns_count):
+        #
+        #         # Select all kernel weights this pixel was convolved with
+        #         # kernels ordering is: (self.nb_filter, self.nb_row, self.nb_col, input_channels)
+        #
+        #         # Get start and end indices for part of kernel tensor that pixels I[y,x] was convolved with
+        #         subkernel_y_start = max(0, y - self.last_preactivation.shape[1] + 1)
+        #         subkernel_x_start = max(0, x - self.last_preactivation.shape[2] + 1)
+        #
+        #         subkernel_y_end = min(kernels.shape[1], y + 1)
+        #         subkernel_x_end = min(kernels.shape[2], x + 1)
+        #
+        #         # Select indices of all elements in preactivation errors that were affected by examined image pixel
+        #         y_slice_end = None if y - subkernel_y_end == -1 else y - subkernel_y_end
+        #         y_slice = slice(y - subkernel_y_start, y_slice_end, -1)
+        #
+        #         x_slice_end = None if x - subkernel_x_end == -1 else x - subkernel_x_end
+        #         x_slice = slice(x - subkernel_x_start, x_slice_end, -1)
+        #
+        #         # Error patch has dimensions images, y, x, output_channels
+        #         error_patch = preactivation_error_gradients[:, y_slice, x_slice, :]
+        #
+        #         # Select part of kernels that were convolved with image region currently computed over
+        #         # subkernel has order kernels count, y, x, input channels
+        #         subkernel = kernels[:, subkernel_y_start:subkernel_y_end, subkernel_x_start:subkernel_x_end, :]
+        #
+        #         # error_patch has output channel dimension in last axis, but subkernel has it in first axis, since
+        #         # error/output channels are equal/result of number of kernels. Roll kernels count
+        #         # axis to end so that error patch and subkernel have output channels dimension in the same location
+        #         # subkernel will now have order: y, x, input_channels, output_channels/kernels count
+        #         subkernel = np.rollaxis(subkernel, 0, 4)
+        #
+        #         # Now roll input channel dimension to end
+        #         # subkernel will now have order: y, x, output_channels, input channels
+        #         subkernel = np.rollaxis(subkernel, 2, 4)
+        #
+        #         # error patch is a 4D tensor with dimensions image, y, x, output channels.
+        #         # subkernel is a 4D tensor with dimensions y, x, output_channels, input_channels.
+        #         # To make them compatible for element wise multiplication, we need error patch to include
+        #         # input channel dimension and subkernel to include images dimension.
+        #
+        #         # Repeat subkernel for each image
+        #         # subkernel now has dimensions images, y, x, output_channels, input_channels
+        #         subkernel = np.array([subkernel] * images_count)
+        #
+        #         # Now add input channels dimension to error patch
+        #         # error patch now has dimensions images, y, x, output_channels, input_channels
+        #         # Numpy will broadcast error patch along last dimension to match size of subkernel
+        #         error_patch = error_patch.reshape(error_patch.shape + (1, ))
+        #
+        #         pixel_gradient = np.sum(error_patch * subkernel, axis=(1, 2, 3))
+        #
+        #         # Dimensions are images, y, x, input channels
+        #         pixel_index = (slice(None), y, x, slice(None))
+        #
+        #         image_gradients[pixel_index] = pixel_gradient
+        #
+        # return image_gradients
+
         # Tensor for storing error gradients on input image
         image_gradients = np.zeros_like(self.last_input, dtype=np.float32)
 
-        images_count = self.last_input.shape[0]
-        rows_count = self.last_input.shape[1]
-        columns_count = self.last_input.shape[2]
+        for image_index in range(self.last_input.shape[0]):
 
-        # For each column
-        for y in range(rows_count):
+            pixel_errors_vector = np.zeros(np.product(self.last_input.shape[1:]))
 
-            # For each row
-            for x in range(columns_count):
+            for kernel_index in range(kernels.shape[0]):
 
-                # Select all kernel weights this pixel was convolved with
-                # kernels ordering is: (self.nb_filter, self.nb_row, self.nb_col, input_channels)
+                kernel_patches_matrix = net.conversions.get_kernel_patches_matrix(
+                    kernels[kernel_index], self.last_input.shape[1:])
 
-                # Get start and end indices for part of kernel tensor that pixels I[y,x] was convolved with
-                subkernel_y_start = max(0, y - self.last_preactivation.shape[1] + 1)
-                subkernel_x_start = max(0, x - self.last_preactivation.shape[2] + 1)
+                # preactivation_error_gradients has shape images, y, x, output channels
+                error_gradients_due_to_kernel = preactivation_error_gradients[image_index, :, :, kernel_index]
+                error_gradients_vector = error_gradients_due_to_kernel.flatten()
 
-                subkernel_y_end = min(kernels.shape[1], y + 1)
-                subkernel_x_end = min(kernels.shape[2], x + 1)
+                pixel_errors_vector += np.dot(kernel_patches_matrix, error_gradients_vector)
 
-                # Select indices of all elements in preactivation errors that were affected by examined image pixel
-                y_slice_end = None if y - subkernel_y_end == -1 else y - subkernel_y_end
-                y_slice = slice(y - subkernel_y_start, y_slice_end, -1)
-
-                x_slice_end = None if x - subkernel_x_end == -1 else x - subkernel_x_end
-                x_slice = slice(x - subkernel_x_start, x_slice_end, -1)
-
-                # Error patch has dimensions images, y, x, output_channels
-                error_patch = preactivation_error_gradients[:, y_slice, x_slice, :]
-
-                # Select part of kernels that were convolved with image region currently computed over
-                # subkernel has order kernels count, y, x, input channels
-                subkernel = kernels[:, subkernel_y_start:subkernel_y_end, subkernel_x_start:subkernel_x_end, :]
-
-                # error_patch has output channel dimension in last axis, but subkernel has it in first axis, since
-                # error/output channels are equal/result of number of kernels. Roll kernels count
-                # axis to end so that error patch and subkernel have output channels dimension in the same location
-                # subkernel will now have order: y, x, input_channels, output_channels/kernels count
-                subkernel = np.rollaxis(subkernel, 0, 4)
-
-                # Now roll input channel dimension to end
-                # subkernel will now have order: y, x, output_channels, input channels
-                subkernel = np.rollaxis(subkernel, 2, 4)
-
-                # error patch is a 4D tensor with dimensions image, y, x, output channels.
-                # subkernel is a 4D tensor with dimensions y, x, output_channels, input_channels.
-                # To make them compatible for element wise multiplication, we need error patch to include
-                # input channel dimension and subkernel to include images dimension.
-
-                # Repeat subkernel for each image
-                # subkernel now has dimensions images, y, x, output_channels, input_channels
-                subkernel = np.array([subkernel] * images_count)
-
-                # Now add input channels dimension to error patch
-                # error patch now has dimensions images, y, x, output_channels, input_channels
-                # Numpy will broadcast error patch along last dimension to match size of subkernel
-                error_patch = error_patch.reshape(error_patch.shape + (1, ))
-
-                pixel_gradient = np.sum(error_patch * subkernel, axis=(1, 2, 3))
-
-                # Dimensions are images, y, x, input channels
-                pixel_index = (slice(None), y, x, slice(None))
-
-                image_gradients[pixel_index] = pixel_gradient
+            image_gradients[image_index, :, :, :] = pixel_errors_vector.reshape(self.last_input.shape[1:])
 
         return image_gradients
 
