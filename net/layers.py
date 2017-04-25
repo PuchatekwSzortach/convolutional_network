@@ -329,18 +329,18 @@ class Convolution2D(Layer):
 
         for image_index in range(self.last_input.shape[0]):
 
-            pixel_errors_vector = np.zeros(np.product(self.last_input.shape[1:]))
+            kernels_patches_matrix = net.conversions.get_kernels_patches_matrix(kernels, self.last_input.shape[1:])
 
-            for kernel_index in range(kernels.shape[0]):
+            # preactivation_error_gradients has shape images, y, x, output channels
+            # Thus error gradients has shape y, x, output channels
+            error_gradients = preactivation_error_gradients[image_index, :, :, ]
 
-                kernel_patches_matrix = net.conversions.get_kernel_patches_matrix(
-                    kernels[kernel_index], self.last_input.shape[1:])
+            # Now transform error gradients to shape output channels, y, x
+            error_gradients = np.rollaxis(error_gradients, 2, 0)
 
-                # preactivation_error_gradients has shape images, y, x, output channels
-                error_gradients_due_to_kernel = preactivation_error_gradients[image_index, :, :, kernel_index]
-                error_gradients_vector = error_gradients_due_to_kernel.flatten()
+            error_gradients_vector = error_gradients.flatten()
 
-                pixel_errors_vector += np.dot(kernel_patches_matrix, error_gradients_vector)
+            pixel_errors_vector = np.dot(kernels_patches_matrix, error_gradients_vector)
 
             image_gradients[image_index, :, :, :] = pixel_errors_vector.reshape(self.last_input.shape[1:])
 
