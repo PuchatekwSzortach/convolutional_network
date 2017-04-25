@@ -190,3 +190,59 @@ def get_kernel_patches_matrix(kernel, image_shape):
                 matrix[row_index] = kernel_patch.flatten()
 
     return matrix
+
+
+def get_kernels_patches_matrix(kernels, image_shape):
+    """
+    Convert 4D kernels tensor into a 2D matrix such that each row of matrix represents
+    kernel elements that a single element of image with image_shape was convolved with.
+    Kernels are spread out in each row in order, first elements from first kernel, then second, etc.
+    :param kernels: 4D numpy array
+    :param image_shape: 3 elements tuple
+    :return: 2D numpy array
+    """
+
+    rows_count = np.product(image_shape)
+
+    kernels_count = kernels.shape[0]
+    single_kernel_errors_patch_y_shape = image_shape[0] - kernels.shape[1] + 1
+    single_kernel_errors_patch_x_shape = image_shape[1] - kernels.shape[2] + 1
+    single_kernel_errors_patch_shape = (single_kernel_errors_patch_y_shape, single_kernel_errors_patch_x_shape)
+
+    columns_count = kernels_count * single_kernel_errors_patch_y_shape * single_kernel_errors_patch_x_shape
+
+    matrix = np.zeros(shape=(rows_count, columns_count))
+
+    for kernel_index in range(kernels_count):
+
+        kernel_offset_start = kernel_index * single_kernel_errors_patch_y_shape * single_kernel_errors_patch_x_shape
+        kernel_offset_end = (kernel_index + 1) * single_kernel_errors_patch_y_shape * single_kernel_errors_patch_x_shape
+
+        for y in range(image_shape[0]):
+
+            kernel_y_start = min(y, kernels.shape[1] - 1)
+            kernel_y_end = max(-1, y - single_kernel_errors_patch_y_shape)
+            kernel_y_range = range(kernel_y_start, kernel_y_end, -1)
+
+            for x in range(image_shape[1]):
+
+                kernel_x_start = min(x, kernels.shape[2] - 1)
+                kernel_x_end = max(-1, x - single_kernel_errors_patch_x_shape)
+                kernel_x_range = range(kernel_x_start, kernel_x_end, -1)
+
+                for z in range(image_shape[2]):
+
+                    row_index = (y * image_shape[1] * image_shape[2]) + (x * image_shape[2]) + z
+
+                    kernel_patch = np.zeros(single_kernel_errors_patch_shape)
+
+                    for kernel_y in kernel_y_range:
+
+                        for kernel_x in kernel_x_range:
+
+                            # Get kernel element
+                            kernel_patch[y - kernel_y, x - kernel_x] = kernels[kernel_index, kernel_y, kernel_x, z]
+
+                    matrix[row_index, kernel_offset_start:kernel_offset_end] = kernel_patch.flatten()
+
+    return matrix
