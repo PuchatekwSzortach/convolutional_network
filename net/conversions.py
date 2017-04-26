@@ -65,15 +65,18 @@ def get_channels_wise_images_batch_patches_matrix(images, kernel_shape):
 
         for kernel_x in range(kernel_shape[1]):
 
-            for kernel_z in range(kernel_shape[2]):
+            y_span = slice(kernel_y, images.shape[1] - kernel_shape[0] + kernel_y + 1)
+            x_span = slice(kernel_x, images.shape[2] - kernel_shape[1] + kernel_x + 1)
 
-                y_span = slice(kernel_y, images.shape[1] - kernel_shape[0] + kernel_y + 1)
-                x_span = slice(kernel_x, images.shape[2] - kernel_shape[1] + kernel_x + 1)
+            # patches_across_images has order images-y-x, z
+            patches_across_images = images[:, y_span, x_span, :].reshape(-1, kernel_shape[2])
 
-                patch_across_images = images[:, y_span, x_span, kernel_z].flatten()
+            row_index_start = (kernel_y * kernel_shape[1] * kernel_shape[2]) + (kernel_x * kernel_shape[2])
+            row_index_end = row_index_start + kernel_shape[2]
 
-                row_index = (kernel_y * kernel_shape[1] * kernel_shape[2]) + (kernel_x * kernel_shape[2]) + kernel_z
-                matrix[row_index] = patch_across_images
+            # Each row of matrix should be for a different channel, thus transpose patches_across_images
+            # so their first dimension is channels
+            matrix[row_index_start:row_index_end] = patches_across_images.T
 
     return matrix
 
