@@ -22,21 +22,21 @@ def get_images_batch_patches_matrix(images, kernel_shape):
     shape = (image_steps * vertical_steps * horizontal_steps, np.product(kernel_shape))
     matrix = np.zeros(shape)
 
-    for image_index in range(images.shape[0]):
+    for row_index in range(images.shape[1] - kernel_shape[0] + 1):
 
-        for row_index in range(images.shape[1] - kernel_shape[0] + 1):
+        for column_index in range(images.shape[2] - kernel_shape[1] + 1):
 
-            for column_index in range(images.shape[2] - kernel_shape[1] + 1):
-
-                patch_index = (image_index, slice(row_index, row_index + kernel_shape[0]),
+            # Select patches for all images at once
+            patches_indices = (slice(None), slice(row_index, row_index + kernel_shape[0]),
                                slice(column_index, column_index + kernel_shape[1]))
 
-                image_patch = images[patch_index]
+            images_patches = images[patches_indices]
 
-                matrix_index = (image_index * vertical_steps * horizontal_steps) + \
-                               (row_index * horizontal_steps) + column_index
+            # Select indices into appropriate rows for y and x indices of all images at once
+            matrix_indices = (np.arange(image_steps) * vertical_steps * horizontal_steps) +\
+                             (row_index * horizontal_steps) + column_index
 
-                matrix[matrix_index] = image_patch.flatten()
+            matrix[matrix_indices] = images_patches.reshape(image_steps, -1)
 
     return matrix
 
@@ -137,8 +137,7 @@ def get_kernels_patches_matrix(kernels, image_shape):
 
             rows_index_start = (y * image_shape[1] * channels_count) + (x * channels_count)
             rows_index_end = rows_index_start + channels_count
-            rows_range = range(rows_index_start, rows_index_end)
 
-            matrix[rows_range] = kernel_patch.reshape(channels_count, -1)
+            matrix[rows_index_start:rows_index_end] = kernel_patch.reshape(channels_count, -1)
 
     return matrix
