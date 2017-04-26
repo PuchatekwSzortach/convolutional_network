@@ -298,6 +298,10 @@ def test_get_kernels_patches_matrix_one_2x2x2x2_kernels_and_2x3x2_image():
 
     actual = net.conversions.get_kernels_patches_matrix(kernels, image_shape)
 
+    # print()
+    # print(expected)
+    # print(actual.astype(np.int32))
+
     assert np.all(expected == actual)
 
 

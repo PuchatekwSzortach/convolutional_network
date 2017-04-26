@@ -26,3 +26,6 @@ Performance script:
 Reworked get_kernels_patches_matrix() to select 2D patch without loop.
 Performance script takes 34 sec, multilayer 1min 51sec
 
+Changed get_kernels_patches_matrix() to work on all kernel channels at once.
+Performance script takes 20 sec, multilayer 1min 2sec
+

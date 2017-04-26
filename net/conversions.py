@@ -116,21 +116,28 @@ def get_kernels_patches_matrix(kernels, image_shape):
                 kernel_x_end = max(-1, x - single_kernel_errors_patch_x_shape)
                 kernel_x_range = range(kernel_x_start, kernel_x_end, -1)
 
-                for z in range(image_shape[2]):
+                kernel_patch = np.zeros(
+                    (single_kernel_errors_patch_y_shape, single_kernel_errors_patch_x_shape, image_shape[2]))
 
-                    row_index = (y * image_shape[1] * image_shape[2]) + (x * image_shape[2]) + z
+                # First select all appropriate rows and all channels
+                # kernel_selection_rows has shape y, x, z
+                kernel_selection_rows = kernels[kernel_index, kernel_y_range, :, :]
 
-                    kernel_patch = np.zeros(single_kernel_errors_patch_shape)
+                # Then from these rows select all appropriate columns and all channels
+                # kernel_selection has shape y, x, z
+                kernel_selection = kernel_selection_rows[:, kernel_x_range, :]
 
-                    # First select all appropriate rows
-                    kernel_selection_rows = kernels[kernel_index, kernel_y_range, :, z]
+                # Kernel patch is in order y, x, z
+                kernel_patch[y - kernel_y_start:y - kernel_y_end, x - kernel_x_start:x - kernel_x_end, :] = \
+                    kernel_selection
 
-                    # Then from these rows select all appropriate columns
-                    kernel_selection = kernel_selection_rows[:, kernel_x_range]
+                # Each matrix row corresponds to different channel, so move channel axis to beginning
+                kernel_patch = np.rollaxis(kernel_patch, 2, 0)
 
-                    kernel_patch[y - kernel_y_start:y - kernel_y_end, x - kernel_x_start:x - kernel_x_end] = \
-                        kernel_selection
+                rows_index_start = (y * image_shape[1] * image_shape[2]) + (x * image_shape[2])
+                rows_index_end = rows_index_start + image_shape[2]
+                rows_range = range(rows_index_start, rows_index_end)
 
-                    matrix[row_index, kernel_offset_start:kernel_offset_end] = kernel_patch.flatten()
+                matrix[rows_range, kernel_offset_start:kernel_offset_end] = kernel_patch.reshape(len(rows_range), -1)
 
     return matrix
