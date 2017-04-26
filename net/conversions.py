@@ -88,9 +88,12 @@ def get_kernels_patches_matrix(kernels, image_shape):
     :return: 2D numpy array
     """
 
+    # Each pixel gets its own row
     rows_count = np.product(image_shape)
 
     kernels_count = kernels.shape[0]
+    channels_count = image_shape[2]
+
     single_kernel_errors_patch_y_shape = image_shape[0] - kernels.shape[1] + 1
     single_kernel_errors_patch_x_shape = image_shape[1] - kernels.shape[2] + 1
 
@@ -116,7 +119,7 @@ def get_kernels_patches_matrix(kernels, image_shape):
 
             kernels_patch = np.zeros(
                 (kernels.shape[0], single_kernel_errors_patch_y_shape,
-                 single_kernel_errors_patch_x_shape, image_shape[2]))
+                 single_kernel_errors_patch_x_shape, channels_count))
 
             # Then from these rows select all appropriate columns and all channels
             # kernel_selection has shape kernels, y, x, z
@@ -129,10 +132,10 @@ def get_kernels_patches_matrix(kernels, image_shape):
             # Each matrix row corresponds to different channel, so move channel axis to beginning
             kernel_patch = np.rollaxis(kernels_patch, 3, 0)
 
-            rows_index_start = (y * image_shape[1] * image_shape[2]) + (x * image_shape[2])
-            rows_index_end = rows_index_start + image_shape[2]
+            rows_index_start = (y * image_shape[1] * channels_count) + (x * channels_count)
+            rows_index_end = rows_index_start + channels_count
             rows_range = range(rows_index_start, rows_index_end)
 
-            matrix[rows_range] = kernel_patch.reshape(len(rows_range), -1)
+            matrix[rows_range] = kernel_patch.reshape(channels_count, -1)
 
     return matrix

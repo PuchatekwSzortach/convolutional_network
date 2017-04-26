@@ -32,3 +32,8 @@ Performance script takes 20 sec, multilayer 1min 2sec
 Changed get_kernels_patches_matrix() to work on all kernels and image channels at once. It still iterates over
 y, x coordinates of image.
 Performance script takes 2.7 sec, multilayer 8 sec
+
+Bottlenecks:
+- get_kernel_patches_matrix() - 1.31sec
+- get_channel_wise_images_batches_patch_matrix() - 0.44sec
+- get_images_batch_patches_matrix() - 0.56sec
