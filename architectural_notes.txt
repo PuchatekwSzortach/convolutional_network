@@ -19,3 +19,6 @@ Bumped up performance script to take 4.5 sec
 
 Reworked get_image_gradients() to use dot product for computations. For now gradients over each image and kernel
 are done separately.
+
+Performance script:
+44sec
