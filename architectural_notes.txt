@@ -22,3 +22,7 @@ are done separately.
 
 Performance script:
 44sec
+
+Reworked get_kernels_patches_matrix() to select 2D patch without loop.
+Performance script takes 34 sec, multilayer 1min 51sec
+

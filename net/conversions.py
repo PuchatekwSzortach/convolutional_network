@@ -122,20 +122,14 @@ def get_kernels_patches_matrix(kernels, image_shape):
 
                     kernel_patch = np.zeros(single_kernel_errors_patch_shape)
 
-                    for kernel_y in kernel_y_range:
+                    # First select all appropriate rows
+                    kernel_selection_rows = kernels[kernel_index, kernel_y_range, :, z]
 
-                        kernel_patch[y - kernel_y, x - kernel_x_start:x - kernel_x_end] = \
-                            kernels[kernel_index, kernel_y, kernel_x_range, z]
+                    # Then from these rows select all appropriate columns
+                    kernel_selection = kernel_selection_rows[:, kernel_x_range]
 
-                    # kernel_selection = kernels[kernel_index, kernel_y_range, kernel_x_range, z]
-
-                    # print("\nAt kernel element {}x{}x{}".format(y, x, z))
-                    # print("kernel_y_range: {}".format(list(kernel_y_range)))
-                    # print("kernel_x_range: {}".format(list(kernel_x_range)))
-                    # print("Kernel selection has shape: {}".format(kernel_selection.shape))
-                    #
-                    # kernel_patch[y - kernel_y_start:y - kernel_y_end, x - kernel_x_start:x - kernel_x_end] = \
-                    #     kernel_selection.reshape(len(kernel_y_range), len(kernel_x_range))
+                    kernel_patch[y - kernel_y_start:y - kernel_y_end, x - kernel_x_start:x - kernel_x_end] = \
+                        kernel_selection
 
                     matrix[row_index, kernel_offset_start:kernel_offset_end] = kernel_patch.flatten()
 
