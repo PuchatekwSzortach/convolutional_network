@@ -324,25 +324,20 @@ class Convolution2D(Layer):
         #
         # return image_gradients
 
-        # Tensor for storing error gradients on input image
-        image_gradients = np.zeros_like(self.last_input, dtype=np.float32)
+        kernels_patches_matrix = net.conversions.get_kernels_patches_matrix(kernels, self.last_input.shape[1:])
 
-        for image_index in range(self.last_input.shape[0]):
+        # preactivation_error_gradients has shape images, y, x, output channels
+        # Transform error gradients to shape images, output channels, y, x
+        error_gradients = np.rollaxis(preactivation_error_gradients, 3, 1)
 
-            kernels_patches_matrix = net.conversions.get_kernels_patches_matrix(kernels, self.last_input.shape[1:])
+        # Now reshape to 2D matrix with each column standing for error from a single image
+        error_gradients = error_gradients.reshape(self.last_input.shape[0], -1).T
 
-            # preactivation_error_gradients has shape images, y, x, output channels
-            # Thus error gradients has shape y, x, output channels
-            error_gradients = preactivation_error_gradients[image_index, :, :, ]
+        # Compute errors on each pixel
+        pixel_errors_matrix = np.dot(kernels_patches_matrix, error_gradients)
 
-            # Now transform error gradients to shape output channels, y, x
-            error_gradients = np.rollaxis(error_gradients, 2, 0)
-
-            error_gradients_vector = error_gradients.flatten()
-
-            pixel_errors_vector = np.dot(kernels_patches_matrix, error_gradients_vector)
-
-            image_gradients[image_index, :, :, :] = pixel_errors_vector.reshape(self.last_input.shape[1:])
+        # Get transpose so that image count is in first dimesion again and reshape to 4D representing batch of 3D images
+        image_gradients = pixel_errors_matrix.T.reshape(self.last_input.shape)
 
         return image_gradients
 
