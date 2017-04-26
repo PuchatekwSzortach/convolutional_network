@@ -104,6 +104,10 @@ def get_kernels_patches_matrix(kernels, image_shape):
         kernel_y_end = max(-1, y - single_kernel_errors_patch_y_shape)
         kernel_y_range = range(kernel_y_start, kernel_y_end, -1)
 
+        # First select all appropriate rows and all channels
+        # kernel_selection_rows has shape kernels, y, x, z
+        kernels_selection_rows = kernels[:, kernel_y_range]
+
         for x in range(image_shape[1]):
 
             kernel_x_start = min(x, kernels.shape[2] - 1)
@@ -113,10 +117,6 @@ def get_kernels_patches_matrix(kernels, image_shape):
             kernels_patch = np.zeros(
                 (kernels.shape[0], single_kernel_errors_patch_y_shape,
                  single_kernel_errors_patch_x_shape, image_shape[2]))
-
-            # First select all appropriate rows and all channels
-            # kernel_selection_rows has shape kernels, y, x, z
-            kernels_selection_rows = kernels[:, kernel_y_range]
 
             # Then from these rows select all appropriate columns and all channels
             # kernel_selection has shape kernels, y, x, z
