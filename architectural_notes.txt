@@ -42,4 +42,4 @@ Changed get_channels_wise_images_batch_patches_matrix() to work on all images an
 Performance script takes 1.83 sec, multilayer 6 sec
 
 Reworked get_images_batch_patches_matrix() to work on all images at once.
-Performance script takes 1.43 sec, multilayer 5 sec
+Performance script takes 1.4 sec, multilayer 5 sec

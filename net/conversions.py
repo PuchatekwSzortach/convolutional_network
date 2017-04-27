@@ -24,13 +24,13 @@ def get_images_batch_patches_matrix(images, kernel_shape):
 
     for row_index in range(images.shape[1] - kernel_shape[0] + 1):
 
+        # Select at once rows from all images across all channels and columns
+        images_rows_patches = images[:, row_index:row_index + kernel_shape[0]]
+
         for column_index in range(images.shape[2] - kernel_shape[1] + 1):
 
-            # Select patches for all images at once
-            patches_indices = (slice(None), slice(row_index, row_index + kernel_shape[0]),
-                               slice(column_index, column_index + kernel_shape[1]))
-
-            images_patches = images[patches_indices]
+            # Now select columns from selected rows
+            images_patches = images_rows_patches[:, :, column_index:column_index + kernel_shape[1]]
 
             # Select indices into appropriate rows for y and x indices of all images at once
             matrix_indices = (np.arange(image_steps) * vertical_steps * horizontal_steps) +\
@@ -63,13 +63,18 @@ def get_channels_wise_images_batch_patches_matrix(images, kernel_shape):
 
     for kernel_y in range(kernel_shape[0]):
 
+        y_span = slice(kernel_y, images.shape[1] - kernel_shape[0] + kernel_y + 1)
+
+        # Select at once rows from all images across all channels and columns
+        rows_patches_across_images = images[:, y_span]
+
         for kernel_x in range(kernel_shape[1]):
 
-            y_span = slice(kernel_y, images.shape[1] - kernel_shape[0] + kernel_y + 1)
             x_span = slice(kernel_x, images.shape[2] - kernel_shape[1] + kernel_x + 1)
 
+            # Now select columns from selected rows
             # patches_across_images has order images-y-x, z
-            patches_across_images = images[:, y_span, x_span, :].reshape(-1, kernel_shape[2])
+            patches_across_images = rows_patches_across_images[:, :, x_span, :].reshape(-1, kernel_shape[2])
 
             row_index_start = (kernel_y * kernel_shape[1] * kernel_shape[2]) + (kernel_x * kernel_shape[2])
             row_index_end = row_index_start + kernel_shape[2]
