@@ -242,4 +242,105 @@ class TestModel:
 
         assert np.allclose(expected, actual, atol=1e-4)
 
+    def test_get_accuracy(self):
 
+        mock_layer = mock.Mock()
+        mock_layer.forward.return_value = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [0, 0, 1],
+        ])
+
+        model = net.models.Model([mock_layer])
+
+        x = np.array([1])
+
+        y = np.array([
+            [1, 0, 0],
+            [1, 0, 0],
+            [1, 0, 0],
+            [1, 0, 0],
+        ])
+
+        assert 0.25 == model.get_accuracy(x, y)
+
+    def test_train_model(self):
+
+        first_layer = net.layers.Convolution2D(filters=1, rows=2, columns=2)
+        second_layer = net.layers.Convolution2D(filters=2, rows=1, columns=1)
+        softmax = net.layers.Softmax()
+
+        layers = [
+            net.layers.Input(sample_shape=(2, 2, 2)),
+            first_layer,
+            second_layer,
+            net.layers.Flatten(),
+            softmax
+        ]
+
+        model = net.models.Model(layers)
+
+        # Substitute kernels and biases with known values
+        first_kernel_first_channel = np.array([
+            [1, 2],
+            [0, 2]
+        ])
+
+        first_kernel_second_channel = np.array([
+            [1, 2],
+            [-3, 0]
+        ])
+
+        first_layer.kernels = np.dstack(
+            [first_kernel_first_channel, first_kernel_second_channel]).reshape(1, 2, 2, 2).astype(np.float32)
+
+        first_layer.biases = np.array([-4], dtype=np.float32)
+
+        second_layer.kernels = np.array([2, 1]).reshape(2, 1, 1, 1).astype(np.float32)
+
+        second_layer.biases = np.array([-1, -2], dtype=np.float32)
+
+        image_first_layer = np.array([
+            [2, 2],
+            [-1, 2]
+        ])
+
+        image_second_layer = np.array([
+            [-1, 3],
+            [2, 1]
+        ])
+
+        x = np.dstack([image_first_layer, image_second_layer]).reshape(1, 2, 2, 2)
+        y = np.array([0, 1], dtype=np.float32).reshape(1, 2)
+
+        model.train(x, y, learning_rate=0.5)
+
+        # Assert convolution layers outputs
+        assert np.all(np.array(5).reshape(1, 1, 1, 1) == first_layer.last_output)
+        assert np.all(np.array([9, 3]).reshape(1, 1, 1, 2) == second_layer.last_output)
+
+        # Assert softmax computations
+        assert np.allclose([0.9975, 0.0025], softmax.last_output, atol=0.01)
+        assert np.allclose([0.9975, -0.9975], softmax.get_output_layer_error_gradients(y), atol=0.01)
+
+        # Assert second layer updates
+        assert np.allclose(np.array([-0.49375, 3.49375]).reshape(2, 1, 1, 1), second_layer.kernels, atol=0.01)
+        assert np.allclose(np.array([-1.49875, -1.50125]), second_layer.biases, atol=0.01)
+
+        # Assert first layer updates
+        expected_first_kernel_first_channel = np.array([
+            [0.0025, 1.0025],
+            [0.49875, 1.0025]
+        ])
+
+        expected_first_kernel_second_channel = np.array([
+            [1.49875, 0.50375],
+            [-3.9975, -0.49875]
+        ])
+
+        expected_first_kernel = np.dstack(
+            [expected_first_kernel_first_channel, expected_first_kernel_second_channel]).reshape(1, 2, 2, 2)
+
+        assert np.allclose(expected_first_kernel, first_layer.kernels, atol=0.01)
+        assert np.allclose(np.array([-4.49925]), first_layer.biases, atol=0.01)
