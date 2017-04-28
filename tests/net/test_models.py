@@ -88,7 +88,7 @@ class TestModel:
     def test_predict_input_convolution_network(self):
 
         input = net.layers.Input(sample_shape=[3, 3, 1])
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
 
         model = net.models.Model([input, convolution])
 
@@ -122,7 +122,7 @@ class TestModel:
     def test_predict_input_convolution_flatten_softmax_network(self):
 
         input = net.layers.Input(sample_shape=[3, 3, 2])
-        convolution = net.layers.Convolution2D(nb_filter=2, nb_row=3, nb_col=3)
+        convolution = net.layers.Convolution2D(filters=2, rows=3, columns=3)
         flatten = net.layers.Flatten()
         softmax = net.layers.Softmax()
 

@@ -282,7 +282,7 @@ class TestConvolution2D:
 
     def test_build_simple(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=3, nb_row=4, nb_col=5)
+        convolution = net.layers.Convolution2D(filters=3, rows=4, columns=5)
         convolution.build(input_shape=(None, 10, 10, 8))
 
         assert (None, 10, 10, 8) == convolution.input_shape
@@ -293,7 +293,7 @@ class TestConvolution2D:
 
     def test_build_input_not_4D(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=3, nb_row=4, nb_col=5)
+        convolution = net.layers.Convolution2D(filters=3, rows=4, columns=5)
 
         with pytest.raises(ValueError):
 
@@ -301,7 +301,7 @@ class TestConvolution2D:
 
     def test_forward_one_image_4x4x1_one_2x2x1_kernel(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
         convolution.build(input_shape=(None, 4, 4, 1))
 
         images = np.array(
@@ -337,7 +337,7 @@ class TestConvolution2D:
 
     def test_forward_single_4x4x1_image_two_2_2_1_kernels(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=2, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=2, rows=2, columns=2)
         convolution.build(input_shape=(None, 4, 4, 1))
 
         images = np.array(
@@ -386,7 +386,7 @@ class TestConvolution2D:
 
     def test_train_forward_one_4x4x1_image_one_2x2x1_kernel(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
         convolution.build(input_shape=(None, 4, 4, 1))
 
         images = np.array(
@@ -423,7 +423,7 @@ class TestConvolution2D:
 
     def test_train_forward_two_2x2x1_images_one_2x2x1_kernel(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
         convolution.build(input_shape=(None, 2, 2, 1))
 
         first_image = np.array([
@@ -457,7 +457,7 @@ class TestConvolution2D:
 
     def test_train_forward_two_3x3x2_images_two_2x2x2_kernels(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=2, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=2, rows=2, columns=2)
         convolution.build(input_shape=(None, 3, 3, 2))
 
         first_image_first_channel = np.array([
@@ -551,7 +551,7 @@ class TestConvolution2D:
 
     def test_train_backward_simple_one_input_channel_and_one_output_channel_single_sample_2x2_image(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
         convolution.build(input_shape=(None, 2, 2, 1))
 
         image = np.array([
@@ -600,7 +600,7 @@ class TestConvolution2D:
 
     def test_train_backward_simple_one_input_channel_and_one_output_channel_single_sample_3x3_image(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
         convolution.build(input_shape=(None, 3, 3, 1))
 
         image = np.array([
@@ -658,7 +658,7 @@ class TestConvolution2D:
 
     def test_train_backward_2x2x2_image_3_filters(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=3, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=3, rows=2, columns=2)
         convolution.build(input_shape=(None, 2, 2, 2))
 
         first_channel = np.array([
@@ -795,7 +795,7 @@ class TestConvolution2D:
 
     def test_train_backward_one_3x3x2_image_2_kernels_2x2x2(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=2, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=2, rows=2, columns=2)
         convolution.build(input_shape=(None, 3, 3, 2))
 
         first_channel = np.array([
@@ -928,7 +928,7 @@ class TestConvolution2D:
 
     def test_train_backward_two_2x2x1_images_one_2x2x1_kernel(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
         convolution.build(input_shape=(None, 2, 2, 1))
 
         first_image = np.array([
@@ -992,7 +992,7 @@ class TestConvolution2D:
 
     def test_train_backward_two_2x2x2_images_one_2x2x2_kernel(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
         convolution.build(input_shape=(None, 2, 2, 2))
 
         first_image_first_channel = np.array([
@@ -1104,7 +1104,7 @@ class TestConvolution2D:
 
     def test_train_backward_two_3x3x2_images_one_2x2x2_kernel(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=1, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=1, rows=2, columns=2)
         convolution.build(input_shape=(None, 3, 3, 2))
 
         first_image_first_channel = np.array([
@@ -1242,7 +1242,7 @@ class TestConvolution2D:
 
     def test_train_backward_two_3x3x2_images_two_2x2x2_kernels(self):
 
-        convolution = net.layers.Convolution2D(nb_filter=2, nb_row=2, nb_col=2)
+        convolution = net.layers.Convolution2D(filters=2, rows=2, columns=2)
         convolution.build(input_shape=(None, 3, 3, 2))
 
         first_image_first_channel = np.array([

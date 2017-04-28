@@ -2,6 +2,8 @@
 Module with models definitions
 """
 
+import pickle
+
 import numpy as np
 
 
@@ -68,3 +70,33 @@ class Model:
             [np.argmax(prediction) == np.argmax(ground_truth) for prediction, ground_truth in zip(predictions, y)])
 
         return correct_predictions_count / len(predictions)
+
+    def save(self, path):
+        """
+        Save model at provided path
+        :param path:
+        """
+
+        with open(path, "wb") as file:
+
+            pickle.dump(self, file)
+
+    @staticmethod
+    def load(path):
+        """
+        Load model from file
+        :param path:
+        :return: Model instance
+        """
+
+        with open(path, "rb") as file:
+
+            model = pickle.load(file)
+
+            if not isinstance(model, Model):
+
+                raise ValueError("Object at path isn't a Model instance")
+
+            return model
+
+
