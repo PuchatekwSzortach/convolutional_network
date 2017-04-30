@@ -1,5 +1,7 @@
 # convolutional_network
 
+[![Build Status](https://travis-ci.org/PuchatekwSzortach/convolutional_network.png?branch=master)](https://travis-ci.org/PuchatekwSzortach/convolutional_network.png)
+
 A simple convolutional network library for image classification. Following layers are made available:
 
 - net.layers.Input
