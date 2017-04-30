@@ -10,6 +10,6 @@ before_install:
 install: 
     - conda env create -f environment.yml
     - source activate convolutional_network_environment
-script: py.test
+script: py.test --cov=./net
 after_success:
   - codecov
