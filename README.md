@@ -10,7 +10,7 @@ A simple convolutional network library for image classification. Following layer
 - net.layers.Flatten
 - net.layers.Softmax
 
-Use it as in code below:
+Simple example:
 
 ```python
 import net.layers
