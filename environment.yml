@@ -5,4 +5,3 @@ dependencies:
   - mock=2.0.*
   - pytest=2.9.*
   - pytest-cov=2.3.*
-  - codecov
