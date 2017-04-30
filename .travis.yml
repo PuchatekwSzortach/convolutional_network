@@ -7,6 +7,6 @@ before_install:
   - ./miniconda.sh -b
   - export PATH=/home/travis/miniconda/bin:$PATH
 install: 
-    - conda env create -f environment.yml
+    - miniconda env create -f environment.yml
     - source activate convolutional_network_environment
 script: py.test
