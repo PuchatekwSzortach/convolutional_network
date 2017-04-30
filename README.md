@@ -1,6 +1,7 @@
 # convolutional_network
 
 [![Build Status](https://travis-ci.org/PuchatekwSzortach/convolutional_network.png?branch=master)](https://travis-ci.org/PuchatekwSzortach/convolutional_network.png)
+[![codecov](https://codecov.io/gh/PuchatekwSzortach/convolutional_network/branch/master/graph/badge.svg)](https://codecov.io/gh/PuchatekwSzortach/convolutional_network)
 
 A simple convolutional network library for image classification. Following layers are made available:
 
